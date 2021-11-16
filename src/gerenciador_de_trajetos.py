@@ -18,11 +18,51 @@ class Gerenciador_de_trajetos():
             return self.trajetos[saida]
         return None
     
-    def find_from_to(self,saida:str,destino:str) -> list | None:
+    def find_from_to(self,saida:str,destino:str) -> list[dict] | None:
         '''
         '''
         if ( saida in self.trajetos ):
             if( destino in self.trajetos[saida] ):
                 return self.trajetos[saida][destino]
-            return None
         return None
+    
+    def make_all_trajetos(self,saida:str,destino:str):
+        resultado = []
+        success=False
+        search = {saida:{
+                "atual":saida,
+                "visited":[saida]
+            }
+        }
+        on_going_search = True
+        while on_going_search:
+            fineshed = True
+            next_iteraration={}
+            for a in search:
+                if( a not in self.trajetos):
+                    continue
+                d = search[a]
+                for c in self.trajetos[d['atual']]:
+                    if( c not in d['visited']):
+                        fineshed = False
+                        if c == destino:
+                            d['visited'].append(c)
+                            resultado.append(d['visited'])
+                            success = True  
+                        else:
+                            to_be_searched ={'atual':c,'visited':d['visited']+[c]}
+                            next_iteraration[c]=to_be_searched
+            search = next_iteraration
+            on_going_search = not fineshed
+            if(next_iteraration == {}):
+                on_going_search = False
+        return success,resultado
+
+if(__name__=='__main__'):
+    saidas = 'asdfasaeqf'
+    destinos='sdqefasdsq'
+    trechos = []
+    for a in range(len(saidas)):
+        trechos.append(Trecho(saida=saidas[a],destino = destinos[a],custo = 1, tempo=1,empresa='A',quantidade_maxima_de_vagas=10))
+    print(f"Esperado :(True, [['a', 's', 'd'], ['a', 'f', 'e', 'd'], ['a', 'f', 'q', 's', 'd']])")
+    print(f"Resultado:{Gerenciador_de_trajetos(trechos).make_all_trajetos('a','d')}")
