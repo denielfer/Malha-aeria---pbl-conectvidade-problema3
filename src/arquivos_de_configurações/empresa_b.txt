@@ -1,0 +1,7 @@
+"nome":"Empresa B"
+"ip":"26.218.88.179"
+"port":18969
+"voos":[{"saida":"salvador" ,"destino":"são paulo","custo":1980,"tempo":2.15,"empresa":"Empresa B","quantidade_maxima_de_vagas":10}
+           {"saida":"são paulo","destino":"Curitiba" ,"custo":980 ,"tempo":1.15,"empresa":"Empresa B","quantidade_maxima_de_vagas":15}]
+"companias":{"Empresa A":{"ip":"26.218.88.179","port":18968}
+             "Empresa C":{"ip":"26.218.88.179","port":18970}}

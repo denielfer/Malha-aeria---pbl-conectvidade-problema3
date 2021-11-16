@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{%block title%}{%endblock%}</title>
+        <style>
+            body {
+            background-color: #212529;
+            color: #899095;
+            }
+
+            a {
+            color: #dee2e6;
+            }
+        
+            a:hover {
+            color: #3cc368;
+            }
+            .center{display: grid; 
+                place-items: center
+            }
+            .button1:hover{
+                background-color: #262b30;
+            }
+            .grave{
+                background-color: #5a1f1f;
+                color: #010200;
+            }
+            .normal{
+                background-color: #287c48;
+                color: #010200;
+            }
+        </style>
+        <scripts type="text/javascript">
+            {%block head%}
+            {%endblock%}
+        </scripts>
+    </head>
+    <body>
+        {%block content%}
+        {%endblock%}
+        {%block scripts%}
+        {%endblock%}
+    </body>
+</html>
