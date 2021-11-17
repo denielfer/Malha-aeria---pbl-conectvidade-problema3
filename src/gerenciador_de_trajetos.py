@@ -10,8 +10,10 @@ class Gerenciador_de_trajetos():
             self.trajetos[a.saida][a.destino].append({
                 'compania':a.empresa,
                 'index':n,
+                'opção':len(self.trajetos[a.saida][a.destino])+1,
                 'custo':a.custo,
-                'tempo':a.tempo})
+                'tempo':a.tempo,
+                'vagas_totais':a.quantidade_maxima_de_vagas})
 
     def find_from(self,saida:str)-> dict | None:
         if (saida in self.trajetos):
@@ -57,6 +59,10 @@ class Gerenciador_de_trajetos():
             if(next_iteraration == {}):
                 on_going_search = False
         return success,resultado
+    
+    def get_vagas(self,index:int):
+        trecho = self.trechos[index]
+        return trecho.quantidade_maxima_de_vagas-trecho.quantidade_de_vagas_ocupadas
 
 if(__name__=='__main__'):
     saidas = 'asdfasaeqf'
@@ -64,5 +70,16 @@ if(__name__=='__main__'):
     trechos = []
     for a in range(len(saidas)):
         trechos.append(Trecho(saida=saidas[a],destino = destinos[a],custo = 1, tempo=1,empresa='A',quantidade_maxima_de_vagas=10))
-    print(f"Esperado :(True, [['a', 's', 'd'], ['a', 'f', 'e', 'd'], ['a', 'f', 'q', 's', 'd']])")
-    print(f"Resultado:{Gerenciador_de_trajetos(trechos).make_all_trajetos('a','d')}")
+    # print(f"Esperado :(True, [['a', 's', 'd'], ['a', 'f', 'e', 'd'], ['a', 'f', 'q', 's', 'd']])")
+    # print(f"Resultado:{Gerenciador_de_trajetos(trechos).make_all_trajetos('a','d')}")
+    assert (True, [['a', 's', 'd'], ['a', 'f', 'e', 'd'], ['a', 'f', 'q', 's', 'd']]) == Gerenciador_de_trajetos(trechos).make_all_trajetos('a','d')
+    print('passed test: 1')
+    # print(f"Esperado :(True, [['f', 'q', 's', 'a'], ['f', 'e', 'd', 'q', 's', 'a']])")
+    # print(f"Resultado:{Gerenciador_de_trajetos(trechos).make_all_trajetos('f','a')}")
+    assert (True, [['f', 'q', 's', 'a'], ['f', 'e', 'd', 'q', 's', 'a']]) == Gerenciador_de_trajetos(trechos).make_all_trajetos('f','a')
+    print('passed test: 2')
+    del(trechos[8])
+    # print(f"Esperado :(False, [])")
+    # print(f"Resultado:{Gerenciador_de_trajetos(trechos).make_all_trajetos('f','a')}")
+    assert (False, []) == Gerenciador_de_trajetos(trechos).make_all_trajetos('f','a')
+    print('passed test: 3')

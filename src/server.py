@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request,render_template
 import requests
 import sys
 from gerenciador_de_trajetos import Gerenciador_de_trajetos
@@ -18,10 +18,74 @@ if(not dados): # caso nao tenha sido caregado os dado atravez de um arquivo de c
 
 app = Flask(__name__)
 
-@app.route('/reservar_trajeto', methods=['POST'])
-def reservar_trajeto():
-    request
-    raise("NÃO IMPLEMENTADO")
+def __get_href_companias__():
+    d = dados['companias']
+    return [(compania,f"http://{dados['companias'][compania]['ip']}:{d[compania]['port']}") for compania in d]
+
+def __get_whitch_companies_is_up__():
+    returned = []
+    for c,h in __get_href_companias__():
+        try:
+            r = requests.get(f'{h}/ping',timeout=0.5)
+            returned.append((c,r.status_code == 200))
+        except:
+            returned.append((c,False))
+    return returned
+
+def __get_base_context__():
+    return {'title':dados['nome'],'compania_is_up':__get_whitch_companies_is_up__()}
+
+@app.route('/', methods=['GET'])
+def home():
+    return render_template('home.html',base_context=__get_base_context__())
+
+@app.route('/ping', methods=['GET'])
+def ping():
+    return '',200
+
+def __get_self_voos__():
+    return [trecho.get_info() for trecho in dados['trechos']]
+
+def __get_all_voos__():
+    hrefs = __get_href_companias__()
+    voos = __get_self_voos__()
+    for href in hrefs:
+        try:
+            print(f'tentando pega voos: {href[0]} -> {href[1]}/voos')
+            voos+= requests.get(f"{href[1]}/voos",timeout=1).json()
+        except Exception: # caso algum noa responda apenas vamos parao proximo
+            pass
+    return voos
+
+def __get_gerenciador_todos_trajetos__():
+    return Gerenciador_de_trajetos(make_trechos(__get_all_voos__()))
+
+@app.route('/ver_trajetos/', methods=['POST'])
+def ver_trajetos():
+    saida,destino = request.form['saida'],request.form['destino']
+    print('from',saida,'to',destino)
+    gerenciador = __get_gerenciador_todos_trajetos__()
+    success,resultado = gerenciador.make_all_trajetos(saida=saida,destino=destino)
+    lista_trechos =[ 
+        (
+            i,
+            [(
+                n+1,trajeto[n],trajeto[n+1],
+                [
+                    {
+                        'compania':trecho['compania'],
+                        'opção':trecho['opção'],
+                        'custo':trecho["custo"],
+                        'tempo':trecho['tempo'],
+                        'vagas':gerenciador.get_vagas(trecho['index']),
+                        'display':j==0
+                    } for j,trecho in enumerate(gerenciador.find_from_to(trajeto[n],trajeto[n+1])) 
+                ],
+                n != len(trajeto)-2
+            )for n in range(len(trajeto)-1) ]
+        ) for i,trajeto in enumerate(resultado)
+    ]
+    return render_template('trajeto_view.html',success=success,resultado=lista_trechos,saida=saida,destino=destino,base_context=__get_base_context__())
 
 
 @app.route('/ocupar/<saida>/<destino>/<compania>', methods=['GET'])
@@ -52,10 +116,6 @@ def reserva_passagem(saida:str,destino:str,compania:str):
             return 'Assento alocado',200
     else:
         return 'A compania informada não foi encontrada',404
-    
-
-def __get_self_voos__():
-    return [trecho.get_info() for trecho in dados['trechos']]
 
 @app.route('/voos', methods=['GET'])
 def voos():
@@ -71,6 +131,5 @@ def all_voos():
         except Exception: # caso algum noa responda apenas vamos parao proximo
             pass
     return jsonify(returned),200
-
 
 app.run(host = dados['ip'], port = dados['port'], debug = True)

@@ -1,14 +1,14 @@
 from threading import Semaphore
 from random import random
 class Trecho:
-    def __init__(self,saida:str,destino:str,custo:float,tempo:float,empresa:str, quantidade_maxima_de_vagas:int):
+    def __init__(self,saida:str,destino:str,custo:float,tempo:float,empresa:str, quantidade_maxima_de_vagas:int,quantidade_de_vagas_ocupadas:int=0, *args,**kargs):
         self.saida = saida
         self.destino = destino
         self.custo = custo
         self.tempo = tempo
         self.empresa = empresa
         self.quantidade_maxima_de_vagas = quantidade_maxima_de_vagas
-        self.quantidade_de_vagas_ocupadas = 0
+        self.quantidade_de_vagas_ocupadas = quantidade_de_vagas_ocupadas
         self.mutex = Semaphore()
     
     def get_peso(self,is_custo:bool) -> None:

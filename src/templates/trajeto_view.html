@@ -1,2 +1,62 @@
 {% extends 'base.html' %}
-{% block title %} {{title}} {% endblock %}
+{%block head%}
+<style>
+    .viajem_display{
+        height:200px;
+        width:100vw;
+        position: relative;
+        /*background-color: cadetblue;*/
+        overflow-x: auto;
+        overflow-y: hidden;
+        display:flex;
+        flex-direction: row;
+    }
+</style>
+{%endblock%}
+{%block content%}
+{%if success %}
+<div class='viajem_display'>
+    {%for i,trajeto in resultado%}
+        {%for n,saida,destino,opções,is_not_final in trajeto%}
+            <div style='display:block;'>
+                <div style='top:0;left:0; max-height: 20px;'>
+                    <p> {{saida}} &#9992; {{destino}} {%if is_not_final %} &#8658; {%endif%}    </p>
+                </div>
+                <div style=' top:20px;left:0; max-height: 80px;'>
+                    <select id='trecho{{i}}{{n}}' onChange=alterar_descrição('{{i}}{{n}}')>
+                        {%for trecho in opções%}
+                            <option value='{{trecho.opção}}' >opição {{trecho.opção}}</option>
+                        {%endfor%}
+                    </select>   
+                    <div id='descrição{{i}}{{n}}'>
+                        {%for trecho in opções%}
+                            <p {% if trecho.display==False%}hidden{%endif%}>
+                                Compania: {{trecho.compania}}<br>
+                                Preço: R${{trecho.custo}}<br> 
+                                Duração do voo: {{trecho.tempo}}h<br>
+                                Vagas:{{trecho.vagas}}
+                            </p>
+                        {%endfor%}
+                    </div>
+                </div>
+            </div>
+        {%endfor%}
+    {%endfor%}
+</div>
+{%else%}
+<div class='center'>
+    <h1>Não foi possivel chegar a {{destino}} apartir de {{saida}}</h1>
+</div>
+{%endif%}
+{%endblock%}
+{%block scripts%}
+<script type="text/javascript">
+    function alterar_descrição(id){
+        let div_descrição = document.getElementById(`descrição${id}`)
+        let select = document.getElementById(`trecho${id}`).value
+        for(i=0;i<div_descrição.children.length;i++){
+            div_descrição.children[i].hidden= (i!=select-1)
+        }
+    }
+</script>
+{%endblock%}
