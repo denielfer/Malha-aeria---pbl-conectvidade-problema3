@@ -32,6 +32,9 @@ class Trecho:
         self.mutex.release()
         return returned
 
+    def get_vagas_livres(self):
+        return self.quantidade_maxima_de_vagas-self.quantidade_de_vagas_ocupadas
+
     def get_info(self):
         return {"saida":self.saida ,"destino":self.destino,"custo":self.custo,"tempo":self.tempo,"empresa":self.empresa,"quantidade_maxima_de_vagas":self.quantidade_maxima_de_vagas,'quantidade_de_vagas_ocupadas':self.quantidade_de_vagas_ocupadas}
 

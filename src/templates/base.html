@@ -45,7 +45,7 @@
     <body>
         <div style='height:50px;position: relative;/* background-color: #212529;*/'>
             <div style="max-width:50vw;/* background-color: #3cc368;*/">
-                <h2>{%for compania,is_on in base_context.compania_is_up%} {{compania}}:{%if is_on%}&#10004;{%else%}&#10008;{%endif%} {%endfor%}</h2>
+                <h2>{%for compania,is_on in base_context.compania_is_up%} {{compania}}:{%if is_on%}&#10004;{%else%}&#10008;{%endif%} {%endfor%} <a href='/'>Home</a></h2>
             </div>
             <div style='position: absolute;top:-20px;left:50vw;margin: 0px 0px;padding: 0px 0px;max-width: 50vw;/*background-color: #5a1f1f;*/'>
                 <form action="/ver_trajetos/" method="POST">

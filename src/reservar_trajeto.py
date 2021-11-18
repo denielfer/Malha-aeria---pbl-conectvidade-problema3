@@ -11,7 +11,7 @@ class Reservador_trajeto:
         self.companias_done=[]
         self.do= do
         self.undo = undo
-        for n,a in enumerate(companias):
+        for n,a in enumerate(self.companias):
             if a in href_companias:
                 self.hrefs_action.append(f'{href_companias[a]}/ocupar/{self.cidades[n]}/{self.cidades[n+1]}/{a}')
                 self.href_undo.append(f'{href_companias[a]}/desocupar/{self.cidades[n]}/{self.cidades[n+1]}/{a}')

@@ -54,7 +54,7 @@ class Gerenciador_de_trajetos():
             if(next_iteraration == {}):
                 on_going_search = False
         return success,resultado
-    
+
     def get_vagas(self,index:int):
         trecho = self.trechos[index]
         return trecho.quantidade_maxima_de_vagas-trecho.quantidade_de_vagas_ocupadas

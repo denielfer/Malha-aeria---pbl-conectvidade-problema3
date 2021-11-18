@@ -44,7 +44,10 @@ def __get_base_context__():
 
 @app.route('/', methods=['GET'])
 def home():
-    return render_template('home.html',base_context=__get_base_context__())
+    v=dados['voos']
+    for n,a in enumerate(v):
+        a['vagas'] = dados['trajetos'].trechos[n].get_vagas_livres()# [a["saida"]][a["destino"]]
+    return render_template('home.html',base_context=__get_base_context__(),trechos=v)
 
 @app.route('/ping', methods=['GET'])
 def ping():
@@ -111,24 +114,24 @@ def reserva_passagem(saida:str,destino:str,compania:str):
         caminho = dados['trajetos'].find_from_to(saida,destino)[0]
         if ( caminho ):
             if(dados['trechos'][caminho['index']].ocupar_vaga()):
-                return 'Assento alocado',200
+                return __render_home_with_text__(text='Assento alocado') ,200
             else:
-                return f'limite de passageiros ja alcançado no voou de {saida} -> {destino} na compania {compania}',404
-        return f'Trecho {saida} -> {destino} não encontrado na compania {compania}',404
+                return __render_home_with_text__(text=f'limite de passageiros ja alcançado no voou de {saida} -> {destino} na compania {compania}'),404
+        return  __render_home_with_text__(text=f'Trecho {saida} -> {destino} não encontrado na compania {compania}'),404
     elif(compania in dados['companias']):
         dados_compania = dados['companias'][compania]
         href = f"http://{dados_compania['ip']}:{dados_compania['port']}/ocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href,timeout=60)
         except Exception as e:# essa exception seria relacionada ao request
-            return f'Problema na reserva do trecho {saida} -> {destino} na compania {compania}',404
+            return __render_home_with_text__(text=f'Problema na reserva do trecho {saida} -> {destino} na compania {compania}'),404
         return request.raw,request.status_code # ainda nao testado se isso sobrepoe o if else abaixo
         if(request.status_code != 200): # se tiver uma forma mais facil pode tira o if else aqui ( ex: retornando o request recebido )
             return 'Problema na reserva do trecho {saida} -> {destino} na compania {compania}',404
         else:
             return 'Assento alocado',200
     else:
-        return 'A compania informada não foi encontrada',404
+        return  __render_home_with_text__(text='A compania informada não foi encontrada'),404
 
 @app.route('/desocupar/<saida>/<destino>/<compania>', methods=['GET'])
 def desreservar_passagem(saida:str,destino:str,compania:str):
