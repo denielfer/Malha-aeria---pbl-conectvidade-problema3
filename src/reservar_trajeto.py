@@ -47,7 +47,7 @@ class Reservador_trajeto:
                         print(f'[DESOCUPAR] Except em desocupar vaga de "{s.strip("/")}" para "{d.strip("/")}" pela compania "{c.strip("/")}"')
                         pass
                     if(resp.status_code == 200):
-                        self.companias_done.append(a)
+                        pass
                     else:
                         print(f'[DESOCUPAR] Erro em desocupar vaga de "{s.strip("/")}" para "{d.strip("/")}" pela compania "{c.strip("/")}"')
             self.undo = undo_f
