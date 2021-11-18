@@ -1,4 +1,4 @@
-"id":"__nome_da_empresa__",
+"nome":"__nome_da_empresa__",
 "ip":"__ip_do_servidor__",
 "port":"__porta_da_api__",
 "voos":[{"saida":"__nome_da_cidade_de_saida" ,"destino":"__nome_da_cidade_de_destino","custo":__custo_da_pasagem__,"tempo":__tempo_da_viagem__,"empresa":"__nome_da_empresa_que_oferece_o_voo__"}

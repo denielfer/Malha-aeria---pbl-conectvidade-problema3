@@ -1,0 +1,13 @@
+"nome":"b"
+"ip":"26.218.88.179"
+"port":18499
+"voos":[{"saida":"d", "destino":"f", "custo":560, "tempo":0.73, "empresa":"b","quantidade_maxima_de_vagas":8}
+{"saida":"r", "destino":"e", "custo":745, "tempo":0.05, "empresa":"b","quantidade_maxima_de_vagas":3}
+{"saida":"g", "destino":"f", "custo":168, "tempo":0.51, "empresa":"b","quantidade_maxima_de_vagas":4}
+{"saida":"w", "destino":"g", "custo":621, "tempo":0.06, "empresa":"b","quantidade_maxima_de_vagas":21}
+{"saida":"f", "destino":"r", "custo":590, "tempo":0.06, "empresa":"b","quantidade_maxima_de_vagas":10}
+{"saida":"f", "destino":"q", "custo":390, "tempo":0.1, "empresa":"b","quantidade_maxima_de_vagas":19}
+{"saida":"r", "destino":"t", "custo":681, "tempo":0.2, "empresa":"b","quantidade_maxima_de_vagas":9}
+{"saida":"a", "destino":"f", "custo":265, "tempo":1.0, "empresa":"b","quantidade_maxima_de_vagas":12}]
+"companias":{"a":{"ip":"26.218.88.179","port":18500}
+"c":{"ip":"26.218.88.179","port":18498}}

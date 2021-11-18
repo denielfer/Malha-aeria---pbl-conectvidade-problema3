@@ -12,3 +12,6 @@ class ConfiguraçãoMalSucedida(Exception):
 
 def make_trechos(trechos:list[dict]):
     return [ Trecho(**a) for a in trechos ]
+
+if(__name__== "__main__"):
+    load_conf_from_file('.//src//arquivos_conf_testes//emp_c.txt')

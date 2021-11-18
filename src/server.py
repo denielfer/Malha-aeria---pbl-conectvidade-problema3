@@ -51,7 +51,7 @@ def __get_all_voos__():
     voos = __get_self_voos__()
     for href in hrefs:
         try:
-            print(f'tentando pega voos: {href[0]} -> {href[1]}/voos')
+            # print(f'tentando pega voos: {href[0]} -> {href[1]}/voos')
             voos+= requests.get(f"{href[1]}/voos",timeout=1).json()
         except Exception: # caso algum noa responda apenas vamos parao proximo
             pass
@@ -60,15 +60,18 @@ def __get_all_voos__():
 def __get_gerenciador_todos_trajetos__():
     return Gerenciador_de_trajetos(make_trechos(__get_all_voos__()))
 
+@app.route('/reservar', methods=['POST'])
+def reservar_trajetos():
+    return 'OK',200
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():
     saida,destino = request.form['saida'],request.form['destino']
-    print('from',saida,'to',destino)
+    # print('from',saida,'to',destino)
     gerenciador = __get_gerenciador_todos_trajetos__()
     success,resultado = gerenciador.make_all_trajetos(saida=saida,destino=destino)
     lista_trechos =[ 
         (
-            i,
+            i+1,
             [(
                 n+1,trajeto[n],trajeto[n+1],
                 [

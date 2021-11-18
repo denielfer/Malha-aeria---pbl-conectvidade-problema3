@@ -1,0 +1,12 @@
+"nome":"a"
+"ip":"26.218.88.179"
+"port":18500
+"voos":[{"saida":"e", "destino":"t", "custo":727, "tempo":0.45, "empresa":"a","quantidade_maxima_de_vagas":12}
+{"saida":"r", "destino":"s", "custo":521, "tempo":0.65, "empresa":"a","quantidade_maxima_de_vagas":28}
+{"saida":"a", "destino":"s", "custo":75, "tempo":0.4, "empresa":"a","quantidade_maxima_de_vagas":7}
+{"saida":"s", "destino":"e", "custo":361, "tempo":0.16, "empresa":"a","quantidade_maxima_de_vagas":2}
+{"saida":"q", "destino":"a", "custo":378, "tempo":0.57, "empresa":"a","quantidade_maxima_de_vagas":2}
+{"saida":"r", "destino":"f", "custo":461, "tempo":0.47, "empresa":"a","quantidade_maxima_de_vagas":17}
+{"saida":"a", "destino":"d", "custo":375, "tempo":0.59, "empresa":"a","quantidade_maxima_de_vagas":3}]
+"companias":{"b":{"ip":"26.218.88.179","port":18499}
+"c":{"ip":"26.218.88.179","port":18498}}

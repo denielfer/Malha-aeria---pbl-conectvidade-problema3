@@ -15,32 +15,42 @@
 {%endblock%}
 {%block content%}
 {%if success %}
-<div class='viajem_display'>
+<div style='display:block;'>
     {%for i,trajeto in resultado%}
-        {%for n,saida,destino,opções,is_not_final in trajeto%}
-            <div style='display:block;'>
-                <div style='top:0;left:0; max-height: 20px;'>
-                    <p> {{saida}} &#9992; {{destino}} {%if is_not_final %} &#8658; {%endif%}    </p>
-                </div>
-                <div style=' top:20px;left:0; max-height: 80px;'>
-                    <select id='trecho{{i}}{{n}}' onChange=alterar_descrição('{{i}}{{n}}')>
-                        {%for trecho in opções%}
-                            <option value='{{trecho.opção}}' >opição {{trecho.opção}}</option>
-                        {%endfor%}
-                    </select>   
-                    <div id='descrição{{i}}{{n}}'>
-                        {%for trecho in opções%}
-                            <p {% if trecho.display==False%}hidden{%endif%}>
-                                Compania: {{trecho.compania}}<br>
-                                Preço: R${{trecho.custo}}<br> 
-                                Duração do voo: {{trecho.tempo}}h<br>
-                                Vagas:{{trecho.vagas}}
-                            </p>
-                        {%endfor%}
+        <form action='/reservar' method='POST'>
+            <div class='viajem_display' id="display_viagem{{i}}">
+                Trajeto {{i}}
+                {%for n,saida,destino,opções,is_not_final in trajeto%}
+                    <div style='display:block; margin-right: 20px;'>
+                        <div style='top:0;left:0; max-height: 20px;'>
+                            <p> {{saida}} &#9992; {{destino}} {%if is_not_final %} &#8658; {%endif%}    </p>
+                        </div>
+                        <div style=' top:20px;left:0; max-height: 80px;'>
+                            <select id='trecho{{i}}{{n}}' onChange=alterar_descrição('{{i}}','{{n}}')>
+                                {%for trecho in opções%}
+                                    <option value='{{trecho.opção}}' >opição {{trecho.opção}}</option>
+                                {%endfor%}
+                            </select>   
+                            <div id='descrição{{i}}{{n}}'>
+                                {%for trecho in opções%}
+                                    <p {% if trecho.display==False%}hidden{%endif%}>
+                                        Compania: {{trecho.compania}}<br>
+                                        Preço: R${{trecho.custo}}<br> 
+                                        Duração do voo: {{trecho.tempo}}h<br>
+                                        Vagas:{{trecho.vagas}}
+                                    </p>
+                                {%endfor%}
+                            </div>
+                        </div>
                     </div>
+                {%endfor%}
+                <div id='resultado{{i}}'>
+                    <p>Custo total:</p>
+                    <p>Tempo total:</p>
+                    <input type="submit" value='Comprar'>
                 </div>
             </div>
-        {%endfor%}
+        </form>
     {%endfor%}
 </div>
 {%else%}
@@ -51,12 +61,50 @@
 {%endblock%}
 {%block scripts%}
 <script type="text/javascript">
-    function alterar_descrição(id){
-        let div_descrição = document.getElementById(`descrição${id}`)
-        let select = document.getElementById(`trecho${id}`).value
-        for(i=0;i<div_descrição.children.length;i++){
+    function make_all_results(){
+        for(let i=1; true;i++){
+            // console.log(`display_viagem${i}`)
+            let a = document.getElementById(`display_viagem${i}`)
+            if(a != null)
+                make_resultados(i)
+            else
+                break
+        }
+    }
+    function make_resultados(id){
+        // console.log('_____________')
+        // console.log(id)
+        let custo = 0
+        let tempo = 0
+        for(let i = 1; true;i++){
+            let a = document.getElementById(`trecho${id}${i}`)
+            if( a != null){
+                let s = a.selectedIndex
+                a = a.value
+                let d = document.getElementById(`descrição${id}${i}`).children[s].innerHTML
+                d = d.replace('<p>','').replace('</p>','').split('<br>')
+                custo += parseFloat(d[1].trim().replace('\n','').split(':')[1].replace('R$','').trim())
+                tempo += parseFloat(d[2].trim().replace('\n','').split(':')[1].replace('h','').trim())
+                // console.log(custo)
+                // console.log(tempo)
+            }else{
+                break
+            }
+        }
+        // console.log(custo)
+        // console.log(tempo)
+        let r = document.getElementById(`resultado${id}`)
+        r.children[0].innerText  = `Custo total: R$${custo.toFixed(2)}`
+        r.children[1].innerText  = `Tempo total: ${tempo.toFixed(2)}h`
+    }
+    make_all_results()
+    function alterar_descrição(index_trajeto,index_trecho){
+        let div_descrição = document.getElementById(`descrição${index_trajeto}${index_trecho}`)
+        let select = document.getElementById(`trecho${index_trajeto}${index_trecho}`).value
+        for(let i=0;i<div_descrição.children.length;i++){
             div_descrição.children[i].hidden= (i!=select-1)
         }
+        make_resultados(index_trajeto)
     }
 </script>
 {%endblock%}

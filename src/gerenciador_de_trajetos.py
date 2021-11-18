@@ -31,31 +31,26 @@ class Gerenciador_de_trajetos():
     def make_all_trajetos(self,saida:str,destino:str):
         resultado = []
         success=False
-        search = {saida:{
-                "atual":saida,
-                "visited":[saida]
-            }
-        }
+        search = {saida:[saida]}
         on_going_search = True
         while on_going_search:
-            fineshed = True
+            # fineshed = True
+            # print(search)
             next_iteraration={}
-            for a in search:
-                if( a not in self.trajetos):
-                    continue
-                d = search[a]
-                for c in self.trajetos[d['atual']]:
-                    if( c not in d['visited']):
-                        fineshed = False
-                        if c == destino:
-                            d['visited'].append(c)
-                            resultado.append(d['visited'])
-                            success = True  
-                        else:
-                            to_be_searched ={'atual':c,'visited':d['visited']+[c]}
-                            next_iteraration[c]=to_be_searched
+            for cidade in search:
+                if( cidade in self.trajetos):
+                    vizinhos = search[cidade]
+                    for cidade_conectada in self.trajetos[cidade]:
+                        # print(f'olhando cidade: {cidade_conectada}')
+                        if( cidade_conectada not in vizinhos):
+                            # fineshed = False
+                            if cidade_conectada == destino:
+                                resultado.append(vizinhos+[cidade_conectada])
+                                success = True  
+                            else:
+                                next_iteraration[cidade_conectada]=vizinhos+[cidade_conectada]
             search = next_iteraration
-            on_going_search = not fineshed
+            # on_going_search = not fineshed
             if(next_iteraration == {}):
                 on_going_search = False
         return success,resultado
