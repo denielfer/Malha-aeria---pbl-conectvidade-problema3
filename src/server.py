@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request,render_template
 import requests
 import sys
 from gerenciador_de_trajetos import Gerenciador_de_trajetos
+from reservar_trajeto import Reservador_trajeto
 dados = None
 
 for n,arg in enumerate(sys.argv): # procuramos se foi passado arquivo de configuração
@@ -21,6 +22,12 @@ app = Flask(__name__)
 def __get_href_companias__():
     d = dados['companias']
     return [(compania,f"http://{dados['companias'][compania]['ip']}:{d[compania]['port']}") for compania in d]
+
+def __get_all_href__():
+    a = __get_href_companias__()
+    b = { c:h for c,h in a }
+    b[dados['nome']] = f"http://{dados['ip']}:{dados['port']}"
+    return b
 
 def __get_whitch_companies_is_up__():
     returned = []
@@ -60,16 +67,20 @@ def __get_all_voos__():
 def __get_gerenciador_todos_trajetos__():
     return Gerenciador_de_trajetos(make_trechos(__get_all_voos__()))
 
+def __render_home_with_text__(text=''):
+        return render_template('text.html',base_context=__get_base_context__(),text=text)
 @app.route('/reservar', methods=['POST'])
 def reservar_trajetos():
-    return 'OK',200
+    r = Reservador_trajeto(request.form['trajeto'], href_companias=__get_all_href__())
+    return __render_home_with_text__(text=r.reservar())
+
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():
     saida,destino = request.form['saida'],request.form['destino']
     # print('from',saida,'to',destino)
     gerenciador = __get_gerenciador_todos_trajetos__()
     success,resultado = gerenciador.make_all_trajetos(saida=saida,destino=destino)
-    lista_trechos =[ 
+    lista_trajetos =[ 
         (
             i+1,
             [(
@@ -88,13 +99,12 @@ def ver_trajetos():
             )for n in range(len(trajeto)-1) ]
         ) for i,trajeto in enumerate(resultado)
     ]
-    return render_template('trajeto_view.html',success=success,resultado=lista_trechos,saida=saida,destino=destino,base_context=__get_base_context__())
+    return render_template('trajeto_view.html',success=success,resultado=lista_trajetos,saida=saida,destino=destino,base_context=__get_base_context__())
 
 
 @app.route('/ocupar/<saida>/<destino>/<compania>', methods=['GET'])
 def reserva_passagem(saida:str,destino:str,compania:str):
     '''
-    
     Rota nao publica para uso interno
     '''
     if(compania == dados["nome"]):
@@ -103,11 +113,39 @@ def reserva_passagem(saida:str,destino:str,compania:str):
             if(dados['trechos'][caminho['index']].ocupar_vaga()):
                 return 'Assento alocado',200
             else:
+                return f'limite de passageiros ja alcançado no voou de {saida} -> {destino} na compania {compania}',404
+        return f'Trecho {saida} -> {destino} não encontrado na compania {compania}',404
+    elif(compania in dados['companias']):
+        dados_compania = dados['companias'][compania]
+        href = f"http://{dados_compania['ip']}:{dados_compania['port']}/ocupar/{saida}/{destino}/{compania}"
+        try:
+            request = requests.get(href,timeout=60)
+        except Exception as e:# essa exception seria relacionada ao request
+            return f'Problema na reserva do trecho {saida} -> {destino} na compania {compania}',404
+        return request.raw,request.status_code # ainda nao testado se isso sobrepoe o if else abaixo
+        if(request.status_code != 200): # se tiver uma forma mais facil pode tira o if else aqui ( ex: retornando o request recebido )
+            return 'Problema na reserva do trecho {saida} -> {destino} na compania {compania}',404
+        else:
+            return 'Assento alocado',200
+    else:
+        return 'A compania informada não foi encontrada',404
+
+@app.route('/desocupar/<saida>/<destino>/<compania>', methods=['GET'])
+def desreservar_passagem(saida:str,destino:str,compania:str):
+    '''
+    Rota nao publica para uso interno
+    '''
+    if(compania == dados["nome"]):
+        caminho = dados['trajetos'].find_from_to(saida,destino)[0]
+        if ( caminho ):
+            if(dados['trechos'][caminho['index']].liberar_vaga()):
+                return 'Assento alocado',200
+            else:
                 return f'limite de passageiros ja alcançado no voou de {saida} -> {destino} na compania {compania}'
         return f'Trecho {saida} -> {destino} não encontrado na compania {compania}',404
     elif(compania in dados['companias']):
         dados_compania = dados['companias'][compania]
-        href = f"http://{dados_compania['ip']}:{dados_compania['port']}/{saida}/{destino}/{compania}"
+        href = f"http://{dados_compania['ip']}:{dados_compania['port']}/desocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href,timeout=60)
         except Exception as e:# essa exception seria relacionada ao request

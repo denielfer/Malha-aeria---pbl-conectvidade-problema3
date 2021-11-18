@@ -3,7 +3,7 @@
 <style>
     .viajem_display{
         height:200px;
-        width:100vw;
+        max-width:100vw;
         position: relative;
         /*background-color: cadetblue;*/
         overflow-x: auto;
@@ -21,12 +21,13 @@
             <div class='viajem_display' id="display_viagem{{i}}">
                 Trajeto {{i}}
                 {%for n,saida,destino,opções,is_not_final in trajeto%}
-                    <div style='display:block; margin-right: 20px;'>
-                        <div style='top:0;left:0; max-height: 20px;'>
-                            <p> {{saida}} &#9992; {{destino}} {%if is_not_final %} &#8658; {%endif%}    </p>
+                    <div style='display:block; margin-right: 20px;display:block;'>
+                        <div style=' max-height: 20px; display: flex;flex-direction: row;'>
+                            <p id='saida_trecho{{i}}{{n}}'> {{saida}}</p><p style='margin-left: 3px;'>  &#9992; </p><p  style='margin-left: 3px;' id='destino_trecho{{i}}{{n}}'>{{destino}}</p><p  style='margin-left: 3px;'>   {%if is_not_final %} &#8658; {%endif%}    </p>
                         </div>
-                        <div style=' top:20px;left:0; max-height: 80px;'>
+                        <div style='margin-top:20px; top:20px;left:0; max-height: 80px;'>
                             <select id='trecho{{i}}{{n}}' onChange=alterar_descrição('{{i}}','{{n}}')>
+                                <!--name='{{saida}}-{{destino}}:'-->
                                 {%for trecho in opções%}
                                     <option value='{{trecho.opção}}' >opição {{trecho.opção}}</option>
                                 {%endfor%}
@@ -47,6 +48,7 @@
                 <div id='resultado{{i}}'>
                     <p>Custo total:</p>
                     <p>Tempo total:</p>
+                    <input type='hidden' id='trajeto{{i}}' name='trajeto' value=''>
                     <input type="submit" value='Comprar'>
                 </div>
             </div>
@@ -55,7 +57,7 @@
 </div>
 {%else%}
 <div class='center'>
-    <h1>Não foi possivel chegar a {{destino}} apartir de {{saida}}</h1>
+    <h1>Não foi possivel chegar a "{{destino}}"" apartir de "{{saida}}"</h1>
 </div>
 {%endif%}
 {%endblock%}
@@ -76,18 +78,25 @@
         // console.log(id)
         let custo = 0
         let tempo = 0
+        let path = ''
+        companias = ''
         for(let i = 1; true;i++){
             let a = document.getElementById(`trecho${id}${i}`)
             if( a != null){
+                path+=(document.getElementById(`saida_trecho${id}${i}`).textContent+'->').trim()
                 let s = a.selectedIndex
                 a = a.value
                 let d = document.getElementById(`descrição${id}${i}`).children[s].innerHTML
                 d = d.replace('<p>','').replace('</p>','').split('<br>')
+                companias += d[0].trim().replace('\n','').split(':')[1].trim()+'->'
                 custo += parseFloat(d[1].trim().replace('\n','').split(':')[1].replace('R$','').trim())
                 tempo += parseFloat(d[2].trim().replace('\n','').split(':')[1].replace('h','').trim())
                 // console.log(custo)
                 // console.log(tempo)
             }else{
+                path+=document.getElementById(`destino_trecho${id}${i-1}`).textContent+'|'+companias
+                document.getElementById(`trajeto${id}`).value = path
+                console.log(path)
                 break
             }
         }
