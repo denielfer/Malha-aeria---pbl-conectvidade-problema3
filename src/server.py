@@ -24,7 +24,7 @@ for n,arg in enumerate(sys.argv): # procuramos se foi passado arquivo de configu
     if( arg == '-cb'): # caso tenha sido passado caregamos ele
         import pickle
         with open(sys.argv[n+1],'rb') as f:
-            dados = pickle.dump(f)
+            dados = pickle.load(f)
             dados['trechos'] = util.make_trechos(dados['voos'])
             dados['trajetos'] = Gerenciador_de_trajetos(dados['trechos'])
 
@@ -35,7 +35,7 @@ if(not dados): # caso nao tenha sido caregado os dado atravez de um arquivo de c
     # print("[SERVIDOR] ERRO DE INICIALIZAÇÂO: Nenhuma configuração foi passada")
     # raise ConfiguraçãoMalSucedida('A configuração não foi realizada')
 
-print(f"Este servidor corresponde ao da Compania: {dados['nome']} e esta sendo executado no link: http://{dados['ip']}:{dados['port']}")
+# print(f"Este servidor corresponde ao da Compania: {dados['nome']} e esta sendo executado no link: http://{dados['ip']}:{dados['port']}")
 
 app = Flask(__name__)
 
