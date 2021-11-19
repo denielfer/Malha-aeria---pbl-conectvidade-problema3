@@ -59,6 +59,21 @@ class Gerenciador_de_trajetos():
         trecho = self.trechos[index]
         return trecho.quantidade_maxima_de_vagas-trecho.quantidade_de_vagas_ocupadas
 
+    def add_voo(self,voo:Trecho):
+        self.trechos.append(voo)
+        if(voo.saida not in self.trajetos):
+            self.trajetos[voo.saida]={}
+        if(voo.destino not in self.trajetos[voo.saida]):
+            self.trajetos[voo.saida][voo.destino]=[]
+        self.trajetos[voo.saida][voo.destino].append({
+                'compania':voo.empresa,
+                'index':len(self.trechos)-1,
+                'opção':len(self.trajetos[voo.saida][voo.destino])+1,
+                'custo':voo.custo,
+                'tempo':voo.tempo,
+                'vagas_totais':voo.quantidade_maxima_de_vagas})
+
+
 if(__name__=='__main__'):
     saidas = 'asdfasaeqf'
     destinos='sdqefasdsq'

@@ -7,5 +7,5 @@
 {"saida":"g", "destino":"s", "custo":200, "tempo":0.71, "empresa":"c","quantidade_maxima_de_vagas":4}
 {"saida":"r", "destino":"a", "custo":524, "tempo":0.12, "empresa":"c","quantidade_maxima_de_vagas":15}
 {"saida":"s", "destino":"d", "custo":903, "tempo":0.83, "empresa":"c","quantidade_maxima_de_vagas":5}]
-"companias":{"a":{"ip":"26.218.88.179","port":18500}
-"b":{"ip":"26.218.88.179","port":18499}}
+"companias":{"a":"http://26.218.88.179:18500"
+"b":"http://26.218.88.179:18499"}

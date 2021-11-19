@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{%block head%}
+{%endblock%}
+{%block content%}
+<div class='center'>
+    <form action='/add_voo' method='POST'>
+        <p> Digite o nome da cidade de Saida: <input name='saida' type="text"> </p>
+        <p> Digite o nome da cidade de Destino: <input name='destino' type="text"> </p>
+        <p> Digite o Custo da viajem em R$: <input name='custo' type="number" step='0.01' min='0.00'> </p>
+        <p> Digite o Tempo da viajem em horas: <input name='tempo' type="number" step='0.01' min='0.00'> </p>
+        <p> Digite a Qauntidade Maxima de Passageitos: <input name='max_pass' type="number" step='1' min='0'> </p>
+        <input type="submit" value='Adicionar'>
+    </form>
+</div>
+{%endblock%}
+{%block scripts%}
+{%endblock%}

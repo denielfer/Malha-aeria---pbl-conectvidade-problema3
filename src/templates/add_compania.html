@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{%block head%}
+{%endblock%}
+{%block content%}
+<div class='center'>
+    <form action='' method='POST'>
+        <p> Digite o nome da compania que esta sendo adicionada: <input name='compania' type="text"> </p>
+        <p> Digite o ip da API compania seguido de ':' seguido da porta na qual a API esta operando: <input name='href' type="text"> </p>
+        <p> Nota: ao "__ip__:__porta__" colocado a cima sera adicionado "http://" no inicio</p>
+        <input type="submit" value='Adicionar'>
+    </form>
+</div>
+{%endblock%}
+{%block scripts%}
+{%endblock%}
