@@ -5,7 +5,7 @@ from gerenciador_de_trajetos import Gerenciador_de_trajetos
 from reservar_trajeto import Reservador_trajeto
 from trecho import Trecho
 import util
-dados = {}
+dados = None
 
 def __escrever_binario_de_conf__():
     with open(f'src//arquivos_bin//{dados["nome"]}.bin','wb') as f:
