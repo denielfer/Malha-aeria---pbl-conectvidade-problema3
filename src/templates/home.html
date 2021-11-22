@@ -3,9 +3,9 @@
 {%endblock%}
 {%block content%}
 <div>
-    <h1 class='center'>Nossos voos:</h1>
+    <h1 class='text-center'>Voos disponíveis:</h1>
     {%for trecho in trechos%}
-    <h3 class = center>
+    <h3 class='text-center content-align-center'>
         De {{trecho.saida}} para {{trecho.destino}} por apenas {{trecho.custo}}.    Tempo da viagem: {{trecho.tempo}}. Vagas restantes:{{trecho.vagas}}.
         <a href='/ocupar/{{trecho.saida}}/{{trecho.destino}}/{{trecho.empresa}}'> <button>Comprar</button></a>
     </h3>

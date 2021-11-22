@@ -15,12 +15,12 @@ class Gerenciador_de_trajetos():
                 'tempo':a.tempo,
                 'vagas_totais':a.quantidade_maxima_de_vagas})
 
-    def find_from(self,saida:str)-> dict | None:
+    def find_from(self,saida:str)-> dict:
         if (saida in self.trajetos):
             return self.trajetos[saida]
         return None
     
-    def find_from_to(self,saida:str,destino:str) -> list[dict] | None:
+    def find_from_to(self,saida:str,destino:str) -> list[dict]:
         '''
         '''
         if ( saida in self.trajetos ):
