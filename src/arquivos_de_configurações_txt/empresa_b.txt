@@ -3,5 +3,5 @@
 "port":18969
 "voos":[{"saida":"salvador" ,"destino":"são paulo","custo":1980,"tempo":2.15,"empresa":"Empresa B","quantidade_maxima_de_vagas":10}
         {"saida":"são paulo","destino":"curitiba" ,"custo":980 ,"tempo":1.15,"empresa":"Empresa B","quantidade_maxima_de_vagas":15}]
-"companias":{"Empresa A":"http://26.218.88.179:18968"
+"companias":{"Empresa A":"http://26.31.211.47:18968"
             "Empresa C":"http://26.218.88.179:18970"}

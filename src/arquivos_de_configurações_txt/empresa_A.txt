@@ -1,5 +1,5 @@
 "nome":"Empresa A"
-"ip":"26.218.88.179"
+"ip":"26.31.211.47"
 "port":18968
 "voos":[{"saida":"salvador" ,"destino":"são paulo","custo":1980,"tempo":2.15,"empresa":"Empresa A","quantidade_maxima_de_vagas":10}
         {"saida":"são paulo","destino":"curitiba" ,"custo":980 ,"tempo":1.15,"empresa":"Empresa A","quantidade_maxima_de_vagas":15}]

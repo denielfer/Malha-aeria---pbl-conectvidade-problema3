@@ -75,21 +75,22 @@ class Gerenciador_de_trajetos():
 
 
 if(__name__=='__main__'):
-    saidas = 'asdfasaeqf'
-    destinos='sdqefasdsq'
+    saidas = 'asdfasaeqfe'
+    destinos='sdqefasdsqw'
     trechos = []
     for a in range(len(saidas)):
         trechos.append(Trecho(saida=saidas[a],destino = destinos[a],custo = 1, tempo=1,empresa='A',quantidade_maxima_de_vagas=10))
+    gerenciador = Gerenciador_de_trajetos(trechos)
     # print(f"Esperado :(True, [['a', 's', 'd'], ['a', 'f', 'e', 'd'], ['a', 'f', 'q', 's', 'd']])")
     # print(f"Resultado:{Gerenciador_de_trajetos(trechos).make_all_trajetos('a','d')}")
-    assert (True, [['a', 's', 'd'], ['a', 'f', 'e', 'd'], ['a', 'f', 'q', 's', 'd']]) == Gerenciador_de_trajetos(trechos).make_all_trajetos('a','d')
+    assert (True, [['a', 's', 'd'], ['a', 'f', 'e', 'd'], ['a', 'f', 'q', 's', 'd']]) == gerenciador.make_all_trajetos('a','d')
     print('passed test: 1')
     # print(f"Esperado :(True, [['f', 'q', 's', 'a'], ['f', 'e', 'd', 'q', 's', 'a']])")
     # print(f"Resultado:{Gerenciador_de_trajetos(trechos).make_all_trajetos('f','a')}")
-    assert (True, [['f', 'q', 's', 'a'], ['f', 'e', 'd', 'q', 's', 'a']]) == Gerenciador_de_trajetos(trechos).make_all_trajetos('f','a')
+    assert (True, [['f', 'q', 's', 'a'], ['f', 'e', 'd', 'q', 's', 'a']]) == gerenciador.make_all_trajetos('f','a')
     print('passed test: 2')
     del(trechos[8])
     # print(f"Esperado :(False, [])")
     # print(f"Resultado:{Gerenciador_de_trajetos(trechos).make_all_trajetos('f','a')}")
-    assert (False, []) == Gerenciador_de_trajetos(trechos).make_all_trajetos('f','a')
+    assert (False, []) == gerenciador.make_all_trajetos('w','a')
     print('passed test: 3')

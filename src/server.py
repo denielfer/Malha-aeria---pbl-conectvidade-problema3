@@ -112,6 +112,9 @@ def ver_trajetos():
                         'vagas':gerenciador.get_vagas(trecho['index']),
                         'display':j==0
                     } for j,trecho in enumerate(gerenciador.find_from_to(trajeto[n],trajeto[n+1])) 
+                    # Nao Precisa verificar se vai terorna no None pois aqui os parametros passados 
+                    #    vem da busca feita no mesmo objeto entao o retorno da busca sao de cidades 
+                    #    que existem no objeto
                 ],
                 n != len(trajeto)-2
             )for n in range(len(trajeto)-1) ]
@@ -126,7 +129,10 @@ def reserva_passagem(saida:str,destino:str,compania:str):
     Rota nao publica para uso interno
     '''
     if(compania == dados["nome"]):
-        caminho = dados['trajetos'].find_from_to(saida,destino)[0]
+        caminho = dados['trajetos'].find_from_to(saida,destino)
+        if(caminho == None):
+            return __render_home_with_text__("Trajeto indicado nao foi encontrado"),404
+        caminho = caminho[0]
         if ( caminho ):
             if(dados['trechos'][caminho['index']].ocupar_vaga()):
                 return __render_home_with_text__(text='Assento alocado') ,200
@@ -154,7 +160,10 @@ def desreservar_passagem(saida:str,destino:str,compania:str):
     Rota nao publica para uso interno
     '''
     if(compania == dados["nome"]):
-        caminho = dados['trajetos'].find_from_to(saida,destino)[0]
+        caminho = dados['trajetos'].find_from_to(saida,destino)
+        if(caminho == None):
+            return __render_home_with_text__("Trajeto indicado nao foi encontrado"),404
+        caminho = caminho[0]
         if ( caminho ):
             if(dados['trechos'][caminho['index']].liberar_vaga()):
                 return  __render_home_with_text__(text='Assento desalocado'),200
@@ -224,4 +233,5 @@ def add_compania():
             return  __render_home_with_text__(text='NA MORAL? METEU ESSA MERMO?'),404
 
 if(__name__== "__main__"):
+    print( dados['ip'],dados['port'])
     app.run(host = dados['ip'], port = dados['port'], debug = False)

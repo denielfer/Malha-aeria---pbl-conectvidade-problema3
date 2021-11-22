@@ -1,5 +1,5 @@
 "nome":"c"
-"ip":"26.218.88.179"
+"ip":"26.31.211.47"
 "port":18498
 "voos":[{"saida":"a", "destino":"w", "custo":177, "tempo":0.25, "empresa":"c","quantidade_maxima_de_vagas":12}
 {"saida":"a", "destino":"d", "custo":715, "tempo":0.78, "empresa":"c","quantidade_maxima_de_vagas":26}
@@ -7,5 +7,5 @@
 {"saida":"g", "destino":"s", "custo":200, "tempo":0.71, "empresa":"c","quantidade_maxima_de_vagas":4}
 {"saida":"r", "destino":"a", "custo":524, "tempo":0.12, "empresa":"c","quantidade_maxima_de_vagas":15}
 {"saida":"s", "destino":"d", "custo":903, "tempo":0.83, "empresa":"c","quantidade_maxima_de_vagas":5}]
-"companias":{"a":"http://26.218.88.179:18500"
-"b":"http://26.218.88.179:18499"}
+"companias":{"a":"http://26.31.211.47:18500"
+"b":"http://26.31.211.47:18499"}
