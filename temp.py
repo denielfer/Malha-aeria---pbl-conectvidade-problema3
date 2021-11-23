@@ -86,7 +86,7 @@ if(__name__=='__main__'):
     # print('passed test: 2')
     # del(trechos[8])
     print(f"Esperado :(True, [['a', 's', 'd'], ['a', 'f', 'd'], ['a', 'f', 'e', 'd'], ['a', 'f', 'q', 's', 'd']]) -> Resultado:{gerenciador.make_all_trajetos('a','q')}")
-    assert (True, [['a', 'f', 'q'], ['a', 's', 'd', 'q'], ['a', 'f', 'd', 'q'], ['a', 'f', 'e', 'd', 'q']]) == gerenciador.make_all_trajetos('a','q')
+    assert (True, [['a', 'f', 'q'], ['a', 'f', 'd', 'q'], ['a', 'f', 'e', 'd', 'q'], ['a', 's', 'd', 'q']]) == gerenciador.make_all_trajetos('a','q')
     # print('passed test: 3')
     print(f"Esperado :(False, []) -> Resultado:{gerenciador.make_all_trajetos('w','a')}")
     assert (False, []) == gerenciador.make_all_trajetos('w','a')
