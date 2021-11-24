@@ -7,20 +7,12 @@ from trecho import Trecho
 import util
 dados = None
 
-def __escrever_binario_de_conf__():
-    with open(f'src//arquivos_bin//{dados["nome"]}.bin','wb') as f:
-        import pickle
-        d = dados.copy()
-        del(d['trechos'])
-        del(d['trajetos'])
-        pickle.dump(d,f)
-
 for n,arg in enumerate(sys.argv): # procuramos se foi passado arquivo de configuração
     if( arg == '-c'): # caso tenha sido passado caregamos ele
         dados = util.load_conf_from_file(sys.argv[n+1])
         dados['trechos'] = util.make_trechos(dados['voos'])
         dados['trajetos'] = Gerenciador_de_trajetos(dados['trechos'])
-        __escrever_binario_de_conf__()
+        util.__escrever_binario_de_conf__(dados)
     if( arg == '-cb'): # caso tenha sido passado caregamos ele
         import pickle
         with open(sys.argv[n+1],'rb') as f:
@@ -215,7 +207,7 @@ def add_voo():
         except Exception as e: # caso o formulario nao tenha os campos que buscamos
             return  __render_home_with_text__(text='NA MORAL? METEU ESSA MERMO?'),404
         dados['voos'].append(novo_voo)
-        __escrever_binario_de_conf__()
+        util.__escrever_binario_de_conf__(dados)
         trecho = Trecho(**novo_voo)
         dados['trechos'].append(trecho)
         dados['trajetos'].add_voo(trecho)
@@ -227,7 +219,7 @@ def add_compania():
     else:
         try:
             dados["companias"][request.form['compania']] = f'http://{request.form["href"]}'
-            __escrever_binario_de_conf__()
+            util.__escrever_binario_de_conf__(dados)
             return  __render_home_with_text__(text=f'a compania: {request.form["compania"]} for adicionada a lista de companias afiliadas. A api desta compania se encontra na porta: {request.form["href"]}'),200
         except Exception: # caso o formulario nao tenha os campos que buscamos
             return  __render_home_with_text__(text='NA MORAL? METEU ESSA MERMO?'),404

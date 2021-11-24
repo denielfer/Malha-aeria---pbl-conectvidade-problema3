@@ -8,6 +8,13 @@ def load_conf_from_file(file_path:str) -> dict:
         json_string = '{'+(','.join(a.readlines())).replace('\n','')+'}'
         return decoder.decode(json_string)
 
+def __escrever_binario_de_conf__(conf):
+    with open(f'arquivos_bin//{conf["nome"]}.bin','wb') as f:
+        import pickle
+        d = conf.copy()
+        del(d['trechos'])
+        del(d['trajetos'])
+        pickle.dump(d,f)
 class ConfiguraçãoMalSucedida(Exception):
     pass
 

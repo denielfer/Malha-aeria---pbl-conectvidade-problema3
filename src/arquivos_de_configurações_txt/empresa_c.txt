@@ -1,0 +1,7 @@
+"nome":"Empresa C"
+"ip":"26.31.211.47"
+"port":18970
+"voos":[{"saida":"salvador" ,"destino":"são paulo","custo":1980,"tempo":2.15,"empresa":"Empresa C","quantidade_maxima_de_vagas":10}
+        {"saida":"são paulo","destino":"curitiba" ,"custo":980 ,"tempo":1.15,"empresa":"Empresa C","quantidade_maxima_de_vagas":15}]
+"companias":{"Empresa B":"http://26.165.180.216:18969"
+            "Empresa A":"http://26.31.211.47:18970"}
