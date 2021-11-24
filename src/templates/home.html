@@ -1,16 +1,28 @@
 {% extends 'base.html' %}
-{%block head%}
-{%endblock%}
-{%block content%}
+{% block head %}
+{% endblock %}
+{% block content %}
 <div>
-    <h1 class='text-center'>Voos disponíveis:</h1>
-    {%for trecho in trechos%}
-    <h3 class='text-center content-align-center'>
-        De {{trecho.saida}} para {{trecho.destino}} por apenas {{trecho.custo}}.    Tempo da viagem: {{trecho.tempo}}. Vagas restantes:{{trecho.vagas}}.
-        <a href='/ocupar/{{trecho.saida}}/{{trecho.destino}}/{{trecho.empresa}}'> <button>Comprar</button></a>
-    </h3>
-    {%endfor%}
+    <h1 class='text-center my-3'>Voos disponíveis:</h1>
+    <div class="row">
+        {% for trecho in trechos %}
+        <div class="col-lg-4 mx-4 mb-4 card" style="width: 18rem;">
+            <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-plane-departure"></i> De <b>{{ trecho.saida }}</b></h5>
+            <h5 class="card-title"><i class="fas fa-plane-arrival"></i> Para <b>{{ trecho.destino }}</b></h5>
+            <p class="card-text">Por apenas R${{ trecho.custo }},00.</p>
+            </div>
+            <ul class="list-group list-group-flush">
+            <li class="list-group-item">Tempo da viagem: {{trecho.tempo}}.</li>
+            <li class="list-group-item">Vagas restantes: {{trecho.vagas}}.</li>
+            </ul>
+            <div class="card-body">
+                <a class="btn btn-warning" href='/ocupar/{{trecho.saida}}/{{trecho.destino}}/{{trecho.empresa}}'>Comprar</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-{%endblock%}
-{%block scripts%}
-{%endblock%}
+{% endblock %}
+{% block scripts %}
+{% endblock %}

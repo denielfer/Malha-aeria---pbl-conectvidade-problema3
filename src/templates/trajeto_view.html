@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{%block head%}
+{% block head %}
 <style>
     .viajem_display{
         height:200px;
@@ -12,10 +12,57 @@
         flex-direction: row;
     }
 </style>
-{%endblock%}
-{%block content%}
-{%if success %}
-<div style='display:block;'>
+{% endblock %}
+{% block content %}
+{% if success %}
+<div>
+        {% for i, trajeto in resultado %}
+        <form action='/reservar' method='POST'>
+        <div id="display_viagem{{i}}" class="col-lg-4 mx-4 mb-4 card">
+                <div class="card-body">
+                    <h5 class="card-title">Trajeto {{ i }}</h5>
+                    <div class="row">
+                    {% for n, saida, destino, opções, is_not_final in trajeto %}
+                        <div class="col">
+                            <ul class="list-inline">
+                                <li id='saida_trecho{{i}}{{n}}' class="list-inline-item card-text">{{ saida }}</li>
+                                <li class="list-inline-item card-text"><i class="fas fa-plane"></i></li>
+                                <li id='destino_trecho{{i}}{{n}}' class="list-inline-item card-text">{{ destino }}</li>
+                                
+                            </ul>
+                            <select id='trecho{{i}}{{n}}' class="form-control" onChange = alterar_descrição('{{i}}','{{n}}')>
+                                {% for trecho in opções %}
+                                    <option value='{{trecho.opção}}'>Opção {{trecho.opção}}</option>
+                                {% endfor %}
+                            </select>
+                            <ul id='descrição{{i}}{{n}}' class="list-group list-group-flush">
+                                {% for trecho in opções %}
+                                    <li class="list-group-item">Companhia: {{ trecho.compania }}</li>
+                                    <li class="list-group-item">Preço: R${{ trecho.custo }}</li>
+                                    <li class="list-group-item">Duração do voo: {{ trecho.tempo }}h</li>
+                                    <li class="list-group-item">Vagas:{{ trecho.vagas }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {%if is_not_final %}
+                        <div class="col-lg-1">
+                            <i class="fas fa-angle-double-right"></i>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                </div>
+                <ul id='resultado{{i}}' class="list-group list-group-flush">
+                <li class="list-group-item">Custo total:</li>
+                <li class="list-group-item">Tempo total:</li>
+                <input type='hidden' id='trajeto{{i}}' name='trajeto' value=''>
+                </ul>
+                <div class="card-body">
+                    <input class="btn btn-warning" type="submit" value="Comprar">
+                </div>
+            </div>
+        </form>
+        {% endfor %}
     {%for i,trajeto in resultado%}
         <form action='/reservar' method='POST'>
             <div class='viajem_display' id="display_viagem{{i}}">
@@ -55,16 +102,16 @@
         </form>
     {%endfor%}
 </div>
-{%else%}
+{% else %}
 <div class='center'>
-    <h1>Não foi possivel chegar a "{{destino}}"" apartir de "{{saida}}"</h1>
+    <h1>Não foi possível chegar a "{{ destino }}" a partir de "{{ saida }}"</h1>
 </div>
-{%endif%}
-{%endblock%}
-{%block scripts%}
+{% endif %}
+{% endblock %}
+{% block scripts %}
 <script type="text/javascript">
     function make_all_results(){
-        for(let i=1; true;i++){
+        for(let i=1; true; i++){
             // console.log(`display_viagem${i}`)
             let a = document.getElementById(`display_viagem${i}`)
             if(a != null)
@@ -80,9 +127,9 @@
         let tempo = 0
         let path = ''
         companias = ''
-        for(let i = 1; true;i++){
+        for(let i = 1; true; i++){
             let a = document.getElementById(`trecho${id}${i}`)
-            if( a != null){
+            if(a != null){
                 path+=(document.getElementById(`saida_trecho${id}${i}`).textContent+'->').trim()
                 let s = a.selectedIndex
                 a = a.value
@@ -116,4 +163,4 @@
         make_resultados(index_trajeto)
     }
 </script>
-{%endblock%}
+{% endblock %}
