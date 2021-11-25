@@ -5,27 +5,14 @@ from gerenciador_de_trajetos import Gerenciador_de_trajetos
 from reservar_trajeto import Reservador_trajeto
 from trecho import Trecho
 import util
-dados = None
+# dados = None
+pedidos_trajetos_pra_processar = []
 
-for n,arg in enumerate(sys.argv): # procuramos se foi passado arquivo de configuração
-    if( arg == '-c'): # caso tenha sido passado caregamos ele
-        dados = util.load_conf_from_file(sys.argv[n+1])
-        dados['trechos'] = util.make_trechos(dados['voos'])
-        dados['trajetos'] = Gerenciador_de_trajetos(dados['trechos'])
-        util.__escrever_binario_de_conf__(dados)
-    if( arg == '-cb'): # caso tenha sido passado caregamos ele
-        import pickle
-        with open(sys.argv[i+1], 'rb') as f:
-            dados = pickle.load(f)
-            dados['trechos'] = util.make_trechos(dados['voos'])
-            dados['trajetos'] = Gerenciador_de_trajetos(dados['trechos'])
-
-if(not dados): # caso nao tenha sido caregado os dado atravez de um arquivo de configuração
-    from util import manual_conf
-    dados = manual_conf()
-    # from util import ConfiguraçãoMalSucedida
-    # print("[SERVIDOR] ERRO DE INICIALIZAÇÂO: Nenhuma configuração foi passada")
-    # raise ConfiguraçãoMalSucedida('A configuração não foi realizada')
+dados = util.load(sys.argv)
+# print(dados)
+if(dados is None):
+    raise("Caregamento de informações não foi realizada com sucesso")
+util.inicializar(dados['companias'],dados['nome'],f"http://{dados['ip']}:{dados['port']}")
 
 # print(f"Este servidor corresponde ao da Compania: {dados['nome']} e esta sendo executado no link: http://{dados['ip']}:{dados['port']}")
 
@@ -36,13 +23,13 @@ def __get_all_href__():
     data[dados['nome']] = f"http://{dados['ip']}:{dados['port']}"
     return data
 
-def __get_whitch_companies_is_up__():
+def __get_whitch_companies_is_up__(): ################################################ pensar em um jeito de colocar como assincrono ###################################################################################
     returned = []
     for c in dados['companias']:
         try:
             request = requests.get(f'{dados["companias"][c]}/ping', timeout = 0.5)
             returned.append((c, request.status_code == 200))
-        except:
+        except Exception:
             returned.append((c, False))
     return returned
 
@@ -63,7 +50,7 @@ def ping():
 def __get_self_voos__():
     return [trecho.get_info() for trecho in dados['trechos']]
 
-def __get_all_voos__():
+def __get_all_voos__(): ################### tranforma em um metodo assincrono ###############################################################################################
     hrefs = dados['companias'].copy()
     voos = __get_self_voos__()
     for c in hrefs:
@@ -115,7 +102,7 @@ def ver_trajetos():
     return render_template('trajeto_view.html',success=success,resultado=lista_trajetos,saida=saida,destino=destino,base_context=__get_base_context__())
 
 
-@app.route('/ocupar/<saida>/<destino>/<compania>', methods=['GET'])
+@app.route('/ocupar/<saida>/<destino>/<compania>', methods=['GET']) ############################################## MUDA PARA NA HOME NAO USAR ROTA OCUPAR E SIM MONTA UM TRAJETO COM APENAS 1 TECHO ###########################
 def reserva_passagem(saida:str, destino:str, compania:str):
     '''
     Rota não pública para uso interno
@@ -212,17 +199,44 @@ def add_voo():
         dados['trechos'].append(trecho)
         dados['trajetos'].add_voo(trecho)
         return __render_home_with_text__(text=f'O voo de {trecho.saida} para {trecho.destino} foi adicionado, com custo de {trecho.custo} e tempo de {trecho.tempo}'), 200
+
 @app.route('/add_compania', methods=['GET', 'POST'])
 def add_compania():
     if(request.method == "GET"):
         return render_template('add_compania.html', base_context=__get_base_context__())
     else:
         try:
-            dados["companias"][request.form['compania']] = f'http://{request.form["href"]}'
+            if( request.form["propagate"] == 'True'):
+                util.propagate(dados['companias'],{request.form['compania']:request.form["href"]})
+            dados["companias"][request.form['compania']] = request.form["href"]
             util.__escrever_binario_de_conf__(dados)
             return  __render_home_with_text__(text=f'a compania: {request.form["compania"]} for adicionada a lista de companias afiliadas. A api desta compania se encontra na porta: {request.form["href"]}'),200
         except Exception: # caso o formulario nao tenha os campos que buscamos
             return  __render_home_with_text__(text='NA MORAL? METEU ESSA MERMO?'),404
+
+@app.route('/companias_conectadas', methods=['GET', 'POST'])
+def companias_conectadas():
+    if(request.method == "GET"):
+        return jsonify(dados['companias']),200
+    else:
+        try:
+            print(request.form)
+            companias_to_check = request.form # companias passadas no request
+        except Exception:
+            return '',404
+        companias_already_in={}
+        companias_out={}
+        for compania,href in companias_to_check.items(): # para as companias recebidas no post
+            if(compania in dados['companias'] and dados['companias'][compania] == href): # se ela ja estiver nos dados e o href for o passado
+                companias_already_in[compania] = href # adicionanos nas companias que ja tinhamos
+            elif(compania == dados['nome']):
+                pass
+            else: # se nao 
+                companias_out[compania] = href # adicionamos nas companias que nao tinhamos
+                dados['companias'][compania] = href # adicionamos ela nas companias que guardados
+        util.propagate(companias_already_in,companias_out) # propagamos para as comapanias que ja tinhamos as companias que nao tinhamos 
+        print(dados['companias'])
+        return '',200
 
 if(__name__== "__main__"):
     print( dados['ip'], dados['port'])
