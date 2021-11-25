@@ -39,8 +39,8 @@ def __get_base_context__():
 @app.route('/', methods=['GET'])
 def home():
     v = dados['voos']
-    for n, a in enumerate(v):
-        a['vagas'] = dados['trajetos'].trechos[n].get_vagas_livres()#[a["saida"]][a["destino"]]
+    for n, a in enumerate(v): # inplace operation
+        a['vagas'] = dados['trajetos'].trechos[n].get_vagas_livres()
     return render_template('home.html', base_context = __get_base_context__(), trechos = v)
 
 @app.route('/ping', methods=['GET'])
@@ -102,7 +102,7 @@ def ver_trajetos():
     return render_template('trajeto_view.html',success=success,resultado=lista_trajetos,saida=saida,destino=destino,base_context=__get_base_context__())
 
 
-@app.route('/ocupar/<saida>/<destino>/<compania>', methods=['GET']) ############################################## MUDA PARA NA HOME NAO USAR ROTA OCUPAR E SIM MONTA UM TRAJETO COM APENAS 1 TECHO ###########################
+@app.route('/ocupar/<saida>/<destino>/<compania>', methods=['GET'])
 def reserva_passagem(saida:str, destino:str, compania:str):
     '''
     Rota não pública para uso interno
@@ -110,28 +110,28 @@ def reserva_passagem(saida:str, destino:str, compania:str):
     if(compania == dados["nome"]):
         caminho = dados['trajetos'].find_from_to(saida, destino)
         if(caminho == None):
-            return __render_home_with_text__("Trajeto indicado nao foi encontrado"), 404
+            return "Trajeto indicado nao foi encontrado", 404
         caminho = caminho[0]
         if (caminho):
             if(dados['trechos'][caminho['index']].ocupar_vaga()):
-                return __render_home_with_text__(text='Assento alocado'), 200
+                return 'Assento alocado', 200
             else:
-                return __render_home_with_text__(text=f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{compania}"'), 404
-        return  __render_home_with_text__(text=f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"'), 404
+                return f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{compania}"', 404
+        return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
     elif(compania in dados['companias']):
         dados_compania = dados['companias'][compania]
         href = f"http://{dados_compania['ip']}:{dados_compania['port']}/ocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href, timeout=60)
         except Exception as e: #essa exception seria relacionada ao request
-            return __render_home_with_text__(text=f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{compania}"'), 404
+            return f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{compania}"', 404
         return request.raw,request.status_code # ainda nao testado se isso sobrepoe o if else abaixo
         if(request.status_code != 200): #se tiver uma forma mais fácil, pode tirar o if else aqui (ex: retornando o request recebido)
             return 'Problema na reserva do trecho {saida} -> {destino} na companhia {compania}', 404
         else:
             return 'Assento alocado', 200
     else:
-        return  __render_home_with_text__(text='A companhia informada não foi encontrada'), 404
+        return  'A companhia informada não foi encontrada', 404
 
 @app.route('/desocupar/<saida>/<destino>/<compania>', methods=['GET'])
 def desreservar_passagem(saida:str, destino:str, compania:str):
@@ -141,21 +141,21 @@ def desreservar_passagem(saida:str, destino:str, compania:str):
     if(compania == dados["nome"]):
         caminho = dados['trajetos'].find_from_to(saida,destino)
         if(caminho == None):
-            return __render_home_with_text__("Trajeto indicado não foi encontrado"), 404
+            return "Trajeto indicado não foi encontrado", 404
         caminho = caminho[0]
         if (caminho):
             if(dados['trechos'][caminho['index']].liberar_vaga()):
-                return  __render_home_with_text__(text='Assento desalocado'),200
+                return 'Assento desalocado',200
             else:
-                return  __render_home_with_text__(text=f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{compania}"'), 200
-        return  __render_home_with_text__(text=f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"'), 404
+                return  f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{compania}"', 200
+        return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
     elif(compania in dados['companias']):
         dados_compania = dados['companias'][compania]
         href = f"http://{dados_compania['ip']}:{dados_compania['port']}/desocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href, timeout=60)
         except Exception as e: #essa exception seria relacionada ao request
-            return  __render_home_with_text__(text=f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{compania}"'), 404
+            return  f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{compania}"', 404
         return request.raw,request.status_code #ainda não testado se isso sobrepõe o if else abaixo
         # if(request.status_code != 200): #se tiver uma forma mais fácil, pode tirar o if else aqui (ex: retornando o request recebido)
         #     return 'Problema na reserva do trecho {saida} -> {destino} na companhia {compania}', 404

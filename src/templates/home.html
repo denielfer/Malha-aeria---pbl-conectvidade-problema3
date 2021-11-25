@@ -17,7 +17,10 @@
                 <li class="list-group-item" style="background-color: rgb(32, 36,36); color: #899095;">Vagas restantes: {{trecho.vagas}}.</li>
             </ul>
             <div class="card-body" style="background-color: rgb(32, 36,36)">
-                <a class="btn btn-warning" href='/ocupar/{{trecho.saida}}/{{trecho.destino}}/{{trecho.empresa}}'>Comprar</a>
+                <form action='/reservar' method='POST'>
+                    <input type='hidden' id='trajeto{{i}}' name='trajeto' value='{{trecho.saida}}->{{trecho.destino}}|{{trecho.empresa}}->'>
+                    <input type='submit' class="btn btn-warning" value="Comprar">
+                </form>
             </div>
         </div>
         {% endfor %}
