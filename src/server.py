@@ -5,6 +5,7 @@ from gerenciador_de_trajetos import Gerenciador_de_trajetos
 from reservar_trajeto import Reservador_trajeto
 from trecho import Trecho
 import util
+
 # dados = None
 pedidos_trajetos_pra_processar = []
 
@@ -23,7 +24,7 @@ def __get_all_href__():
     data[dados['nome']] = f"http://{dados['ip']}:{dados['port']}"
     return data
 
-def __get_whitch_companies_is_up__(): ################################################ pensar em um jeito de colocar como assincrono ###################################################################################
+def __get_whitch_companies_is_up__():
     returned = []
     for c in dados['companias']:
         try:
@@ -50,7 +51,7 @@ def ping():
 def __get_self_voos__():
     return [trecho.get_info() for trecho in dados['trechos']]
 
-def __get_all_voos__(): ################### tranforma em um metodo assincrono ###############################################################################################
+def __get_all_voos__():
     hrefs = dados['companias'].copy()
     voos = __get_self_voos__()
     for c in hrefs:
