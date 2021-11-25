@@ -18,13 +18,13 @@
 <div>
     {% for i, trajeto in resultado %}
         <form action='/reservar' method='POST'>
-        <div id="display_viagem{{i}}" class="col-lg-4 mx-4 mb-4 card">
+        <div id="display_viagem{{i}}" class="mx-4 mb-4 card">
                 <div class="card-body">
                     <h5 class="card-title">Trajeto {{ i }}</h5>
                     <div class="row">
                     {% for n, saida, destino, opções, is_not_final in trajeto %}
                         <div class="col">
-                            <ul class="list-inline">
+                            <ul class="list-inline center">
                                 <li id='saida_trecho{{i}}{{n}}' class="list-inline-item card-text">{{ saida }}</li>
                                 <li class="list-inline-item card-text"><i class="fas fa-plane"></i></li>
                                 <li id='destino_trecho{{i}}{{n}}' class="list-inline-item card-text">{{ destino }}</li>
@@ -47,7 +47,7 @@
                             </ul>
                         </div>
                         {%if is_not_final %}
-                        <div class="col-lg-1">
+                        <div class="col-1" style="max-width: 20px;">
                             <i class="fas fa-angle-double-right"></i>
                         </div>
                         {% endif %}
@@ -139,7 +139,7 @@
                 let select = document.getElementById(`trecho${id}${i}`).value -1
                 d = d[select].children
                 // console.log(d)
-                companias += d[0].textContent.replace('\n','').split(':')[1]+'->'
+                companias += d[0].textContent.replace('\n','').replace(' ','').split(':')[1]+'->'
                 custo += parseFloat(d[1].textContent.replace('\n','').split(':')[1].replace('R$',''))
                 tempo += parseFloat(d[2].textContent.replace('\n','').split(':')[1].replace('h',''))
                 // console.log(custo)

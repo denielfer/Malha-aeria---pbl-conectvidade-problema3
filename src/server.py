@@ -129,15 +129,15 @@ def reserva_passagem(saida:str, destino:str, compania:str):
             if(dados['trechos'][caminho['index']].ocupar_vaga()):
                 return __render_home_with_text__(text='Assento alocado'), 200
             else:
-                return __render_home_with_text__(text=f'limite de passageiros ja alcançado no voo de {saida} -> {destino} na companhia {compania}'), 404
-        return  __render_home_with_text__(text=f'Trecho {saida} -> {destino} não encontrado na companhia {compania}'), 404
+                return __render_home_with_text__(text=f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{compania}"'), 404
+        return  __render_home_with_text__(text=f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"'), 404
     elif(compania in dados['companias']):
         dados_compania = dados['companias'][compania]
         href = f"http://{dados_compania['ip']}:{dados_compania['port']}/ocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href, timeout=60)
         except Exception as e: #essa exception seria relacionada ao request
-            return __render_home_with_text__(text=f'Problema na reserva do trecho {saida} -> {destino} na companhia {compania}'), 404
+            return __render_home_with_text__(text=f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{compania}"'), 404
         return request.raw,request.status_code # ainda nao testado se isso sobrepoe o if else abaixo
         if(request.status_code != 200): #se tiver uma forma mais fácil, pode tirar o if else aqui (ex: retornando o request recebido)
             return 'Problema na reserva do trecho {saida} -> {destino} na companhia {compania}', 404
@@ -160,15 +160,15 @@ def desreservar_passagem(saida:str, destino:str, compania:str):
             if(dados['trechos'][caminho['index']].liberar_vaga()):
                 return  __render_home_with_text__(text='Assento desalocado'),200
             else:
-                return  __render_home_with_text__(text=f'O voo já tem sua capacidade máxima livre. Voo de {saida} -> {destino} na companhia {compania}'), 200
-        return  __render_home_with_text__(text=f'Trecho {saida} -> {destino} não encontrado na companhia {compania}'), 404
+                return  __render_home_with_text__(text=f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{compania}"'), 200
+        return  __render_home_with_text__(text=f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"'), 404
     elif(compania in dados['companias']):
         dados_compania = dados['companias'][compania]
         href = f"http://{dados_compania['ip']}:{dados_compania['port']}/desocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href, timeout=60)
         except Exception as e: #essa exception seria relacionada ao request
-            return  __render_home_with_text__(text=f'Problema na reserva do trecho {saida} -> {destino} na companhia {compania}'), 404
+            return  __render_home_with_text__(text=f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{compania}"'), 404
         return request.raw,request.status_code #ainda não testado se isso sobrepõe o if else abaixo
         # if(request.status_code != 200): #se tiver uma forma mais fácil, pode tirar o if else aqui (ex: retornando o request recebido)
         #     return 'Problema na reserva do trecho {saida} -> {destino} na companhia {compania}', 404

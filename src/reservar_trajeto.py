@@ -10,10 +10,17 @@ class Reservador_trajeto:
         self.companias_done = []
         self.do = do
         self.undo = undo
+        # print("________________")
+        # print(self.companias,companias,self.cidades,cidades)
         for i, companhia in enumerate(self.companias):
+            # print(companhia in companias)
             if companhia in href_companias:
                 self.hrefs_action.append(f'{href_companias[companhia]}/ocupar/{self.cidades[i]}/{self.cidades[i+1]}/{companhia}')
                 self.href_undo.append(f'{href_companias[companhia]}/desocupar/{self.cidades[i]}/{self.cidades[i+1]}/{companhia}')
+        # print()
+        # print(self.hrefs_action,self.href_undo)
+        # print()
+        # print("________________")
         if(do == None):
             def do_f():
                 for i, companhia in enumerate(self.companias):
