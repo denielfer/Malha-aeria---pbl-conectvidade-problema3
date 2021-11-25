@@ -1,6 +1,5 @@
 from trecho import Trecho
 import requests
-
 class Reservador_trajeto:
     def __init__(self, trajeto:str, href_companias:list[dict], do = None, undo = None):
         cidades,companias = trajeto.split('|')

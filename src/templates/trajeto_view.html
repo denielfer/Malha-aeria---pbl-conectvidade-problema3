@@ -16,7 +16,7 @@
 {% block content %}
 {% if success %}
 <div>
-        {% for i, trajeto in resultado %}
+    {% for i, trajeto in resultado %}
         <form action='/reservar' method='POST'>
         <div id="display_viagem{{i}}" class="col-lg-4 mx-4 mb-4 card">
                 <div class="card-body">
@@ -36,11 +36,13 @@
                                 {% endfor %}
                             </select>
                             <ul id='descrição{{i}}{{n}}' class="list-group list-group-flush">
-                                {% for trecho in opções %}
-                                    <li class="list-group-item">Companhia: {{ trecho.compania }}</li>
-                                    <li class="list-group-item">Preço: R${{ trecho.custo }}</li>
-                                    <li class="list-group-item">Duração do voo: {{ trecho.tempo }}h</li>
-                                    <li class="list-group-item">Vagas:{{ trecho.vagas }}</li>
+                               {% for trecho in opções %}
+                                    <div {%if trecho.display%}{%else%}hidden{%endif%}>
+                                        <li class="list-group-item">Companhia: {{ trecho.compania }}</li>
+                                        <li class="list-group-item">Preço: R${{ trecho.custo }}</li>
+                                        <li class="list-group-item">Duração do voo: {{ trecho.tempo }}h</li>
+                                        <li class="list-group-item">Vagas:{{ trecho.vagas }}</li>
+                                    </div>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -53,8 +55,8 @@
                     </div>
                 </div>
                 <ul id='resultado{{i}}' class="list-group list-group-flush">
-                <li class="list-group-item">Custo total:</li>
-                <li class="list-group-item">Tempo total:</li>
+                <li id='custo{{i}}' class="list-group-item">Custo total:</li>
+                <li id='tempo{{i}}' class="list-group-item">Tempo total:</li>
                 <input type='hidden' id='trajeto{{i}}' name='trajeto' value=''>
                 </ul>
                 <div class="card-body">
@@ -62,8 +64,8 @@
                 </div>
             </div>
         </form>
-        {% endfor %}
-    {%for i,trajeto in resultado%}
+    {% endfor %}
+    <!-- {%for i,trajeto in resultado%}
         <form action='/reservar' method='POST'>
             <div class='viajem_display' id="display_viagem{{i}}">
                 Trajeto {{i}}
@@ -74,7 +76,7 @@
                         </div>
                         <div style='margin-top:20px; top:20px;left:0; max-height: 80px;'>
                             <select id='trecho{{i}}{{n}}' onChange=alterar_descrição('{{i}}','{{n}}')>
-                                <!--name='{{saida}}-{{destino}}:'-->
+                                <!--name='{{saida}}-{{destino}}:'
                                 {%for trecho in opções%}
                                     <option value='{{trecho.opção}}' >opição {{trecho.opção}}</option>
                                 {%endfor%}
@@ -100,7 +102,7 @@
                 </div>
             </div>
         </form>
-    {%endfor%}
+    {%endfor%} -->
 </div>
 {% else %}
 <div class='center'>
@@ -130,35 +132,39 @@
         for(let i = 1; true; i++){
             let a = document.getElementById(`trecho${id}${i}`)
             if(a != null){
-                path+=(document.getElementById(`saida_trecho${id}${i}`).textContent+'->').trim()
+                path+=( document.getElementById(`saida_trecho${id}${i}`).textContent+'->')
                 let s = a.selectedIndex
                 a = a.value
-                let d = document.getElementById(`descrição${id}${i}`).children[s].innerHTML
-                d = d.replace('<p>','').replace('</p>','').split('<br>')
-                companias += d[0].trim().replace('\n','').split(':')[1].trim()+'->'
-                custo += parseFloat(d[1].trim().replace('\n','').split(':')[1].replace('R$','').trim())
-                tempo += parseFloat(d[2].trim().replace('\n','').split(':')[1].replace('h','').trim())
+                let d = document.getElementById(`descrição${id}${i}`).children
+                let select = document.getElementById(`trecho${id}${i}`).value -1
+                d = d[select].children
+                // console.log(d)
+                companias += d[0].textContent.replace('\n','').split(':')[1]+'->'
+                custo += parseFloat(d[1].textContent.replace('\n','').split(':')[1].replace('R$',''))
+                tempo += parseFloat(d[2].textContent.replace('\n','').split(':')[1].replace('h',''))
                 // console.log(custo)
                 // console.log(tempo)
             }else{
                 path+=document.getElementById(`destino_trecho${id}${i-1}`).textContent+'|'+companias
                 document.getElementById(`trajeto${id}`).value = path
-                console.log(path)
                 break
             }
         }
-        // console.log(custo)
-        // console.log(tempo)
         let r = document.getElementById(`resultado${id}`)
-        r.children[0].innerText  = `Custo total: R$${custo.toFixed(2)}`
-        r.children[1].innerText  = `Tempo total: ${tempo.toFixed(2)}h`
+        let c = document.getElementById(`custo${id}`)
+        let t = document.getElementById(`tempo${id}`)
+        c.textContent = `Custo total: R$${custo.toFixed(2)}`
+        t.textContent = `Tempo total: ${tempo.toFixed(2)}h`
     }
     make_all_results()
     function alterar_descrição(index_trajeto,index_trecho){
-        let div_descrição = document.getElementById(`descrição${index_trajeto}${index_trecho}`)
-        let select = document.getElementById(`trecho${index_trajeto}${index_trecho}`).value
-        for(let i=0;i<div_descrição.children.length;i++){
-            div_descrição.children[i].hidden= (i!=select-1)
+        let select = document.getElementById(`trecho${index_trajeto}${index_trecho}`).value -1
+        // console.log(select)
+        let descrições = document.getElementById(`descrição${index_trajeto}${index_trecho}`).children
+        // console.log( descrições )
+        for(let i=0; i<descrições.length; i++){
+            // console.log( descrições[i] )
+            descrições[i].hidden = i!=select
         }
         make_resultados(index_trajeto)
     }
