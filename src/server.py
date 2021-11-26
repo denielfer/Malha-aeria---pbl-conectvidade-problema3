@@ -5,6 +5,8 @@ from gerenciador_de_trajetos import Gerenciador_de_trajetos
 from reservar_trajeto import Reservador_trajeto
 from trecho import Trecho
 import util
+# from time import sleep
+# from threading import Semaphore
 
 # dados = None
 pedidos_trajetos_pra_processar = []
@@ -16,6 +18,9 @@ if(dados is None):
 util.inicializar(dados['companias'],dados['nome'],f"http://{dados['ip']}:{dados['port']}")
 
 # print(f"Este servidor corresponde ao da Compania: {dados['nome']} e esta sendo executado no link: http://{dados['ip']}:{dados['port']}")
+
+# trajetos_para_reservar:list[Reservador_trajeto] = []
+# fazendo_reserva = Semaphore()
 
 app = Flask(__name__)
 
@@ -71,6 +76,10 @@ def __render_home_with_text__(text=''):
 def reservar_trajetos():
     r = Reservador_trajeto(request.form['trajeto'], href_companias=__get_all_href__())
     return __render_home_with_text__(text=r.reservar())
+    # trajetos_para_reservar.append(r)
+    # while r.status != "Erro" or r.status != "Reservado":
+    #     sleep(0.1)
+    # return __render_home_with_text__(text=r.text)
 
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():
@@ -207,8 +216,7 @@ def add_compania():
         return render_template('add_compania.html', base_context=__get_base_context__())
     else:
         try:
-            if( request.form["propagate"] == 'True'):
-                util.propagate(dados['companias'],{request.form['compania']:request.form["href"]})
+            util.propagate(dados['companias'],{request.form['compania']:request.form["href"]})
             dados["companias"][request.form['compania']] = request.form["href"]
             util.__escrever_binario_de_conf__(dados)
             return  __render_home_with_text__(text=f'a compania: {request.form["compania"]} for adicionada a lista de companias afiliadas. A api desta compania se encontra na porta: {request.form["href"]}'),200
@@ -221,7 +229,7 @@ def companias_conectadas():
         return jsonify(dados['companias']),200
     else:
         try:
-            print(request.form)
+            # print(request.form)
             companias_to_check = request.form # companias passadas no request
         except Exception:
             return '',404
@@ -235,8 +243,12 @@ def companias_conectadas():
             else: # se nao 
                 companias_out[compania] = href # adicionamos nas companias que nao tinhamos
                 dados['companias'][compania] = href # adicionamos ela nas companias que guardados
-        util.propagate(companias_already_in,companias_out) # propagamos para as comapanias que ja tinhamos as companias que nao tinhamos 
-        print(dados['companias'])
+        util.propagate(companias_already_in,dados['companias']) # propagamos para as comapanias que ja tinhamos as companias que nao tinhamos 
+        # if(dados['companias'] != companias_to_check):
+        #     dados['companias'].update(companias_to_check)
+            # t = dados['companias'].copy()
+            # util.propagate(t,t) 
+        # print(dados['companias'])
         return '',200
 
 if(__name__== "__main__"):

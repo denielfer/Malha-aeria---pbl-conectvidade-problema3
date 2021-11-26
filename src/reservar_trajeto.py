@@ -11,6 +11,8 @@ class Reservador_trajeto:
         self.companias_done = []
         self.do = do
         self.undo = undo
+        self.status='esperando'
+        self.text=''
         # print("________________")
         # print(f'{self.companias=},{companias=},{self.cidades=},{cidades=}')
         for i, companhia in enumerate(self.companias):
@@ -24,6 +26,7 @@ class Reservador_trajeto:
         # print()
         # print("________________")
         if(do == None):
+            self.status = 'reservando'
             def do_f():
                 for i, companhia in enumerate(self.companias):
                     try:
@@ -42,10 +45,12 @@ class Reservador_trajeto:
                         print(f'[OCUPAR] Erro em ocupar vaga de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}"')
                         self.undo()
                         return f'Erro em Reservar vagas, o número máximo de vagas do voo de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}". Nenhuma vaga foi reservada.'
+                self.status='Reservado'
                 return 'Vagas reservadas com sucesso'
             self.do = do_f
         if(undo == None):
             def undo_f():
+                self.status="Erro"
                 for i, companhia in enumerate(self.companias_done):
                     try:
                         resp = requests.get(self.href_undo[i])
@@ -60,4 +65,4 @@ class Reservador_trajeto:
                         print(f'[DESOCUPAR] Erro em desocupar vaga de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}"')
             self.undo = undo_f
     def reservar(self) -> bool:
-        return self.do()
+        self.text= self.do()
