@@ -75,11 +75,11 @@ def __render_home_with_text__(text=''):
 @app.route('/reservar', methods=['POST'])
 def reservar_trajetos():
     r = Reservador_trajeto(request.form['trajeto'], href_companias=__get_all_href__())
-    return __render_home_with_text__(text=r.reservar())
-    # trajetos_para_reservar.append(r)
-    # while r.status != "Erro" or r.status != "Reservado":
-    #     sleep(0.1)
-    # return __render_home_with_text__(text=r.text)
+    # return __render_home_with_text__(text=r.reservar())
+    trajetos_para_reservar.append(r)
+    while r.status != "Erro" or r.status != "Reservado":
+        sleep(0.1)
+    return __render_home_with_text__(text=r.text)
 
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():
