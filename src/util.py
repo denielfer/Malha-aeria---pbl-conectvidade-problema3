@@ -70,14 +70,14 @@ def load(argv):
         dados = manual_conf()
     return dados
 
-def inicializar(companias,nome,self_href):
+def inicializar(companias,nome,self_href,todas_as_companias):
     ## Busca de companias conectadas de nas companias ja conectadas
     continuar = True
     companias_to_do = companias.copy()
     companias_avizadas = {}
     while continuar:
         companias_copy = companias.copy()
-        __propagate__(companias_to_do,companias)
+        __propagate__(companias_to_do,todas_as_companias)
         # com a linha a cima propagamos para todas as companias que conhecemos
         # (no primeira iteração) todas as companias que conhecemos, e nas 
         # proximas ( 2 iteração endiante ) para as que passamos a conhecer 
@@ -113,6 +113,31 @@ def inicializar(companias,nome,self_href):
             companias.update(companias_copy)
             companias_to_do = companias_adicionadas
     # assim as que ja estavam no sistema e nos nao conheciamos sao conhecidos por todos
+
+def inicializar_ring(companias,todas_as_companias):
+    __propagate__(companias,todas_as_companias) # emviamos para todas que conhecemos todas as que conhecemos ( incluindo agente )
+    ordens = {}
+    for compania,href in companias.items():
+        try:
+            resp = get(f'{href}/get_ordem_manager').json()
+        except:
+            continue
+        ordens[compania]=resp
+    base_ordem = None
+    for ordem in ordens.values():
+        if(base_ordem is None):
+            base_ordem = ordem
+        elif(ordem != base_ordem):
+            base_ordem.update(ordem)
+            change=True
+    todas_as_companias = base_ordem
+    for href in companias.values():
+        try:
+            post(f'{href}/set_ordem_manager',data = base_ordem)
+        except:
+            pass
+    return base_ordem
+
 
 
 if(__name__== "__main__"):
