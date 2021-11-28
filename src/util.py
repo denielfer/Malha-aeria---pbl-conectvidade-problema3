@@ -1,7 +1,9 @@
 from json import JSONDecoder
 import threading
+from time import sleep
 from trecho import Trecho
 from gerenciador_de_trajetos import Gerenciador_de_trajetos
+from reservar_trajeto import Reservador_trajeto
 from requests import get,post
 
 decoder = JSONDecoder()
@@ -111,6 +113,7 @@ def inicializar(companias,nome,self_href):
             companias.update(companias_copy)
             companias_to_do = companias_adicionadas
     # assim as que ja estavam no sistema e nos nao conheciamos sao conhecidos por todos
+
 
 if(__name__== "__main__"):
     load_conf_from_file('.//src//arquivos_conf_testes//emp_c.txt')

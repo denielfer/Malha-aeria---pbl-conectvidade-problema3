@@ -26,8 +26,8 @@ class Reservador_trajeto:
         # print()
         # print("________________")
         if(do == None):
-            self.status = 'reservando'
             def do_f():
+                self.status = 'reservando'
                 for i, companhia in enumerate(self.companias):
                     try:
                         resp = requests.get(self.hrefs_action[i], timeout=10)
@@ -64,5 +64,5 @@ class Reservador_trajeto:
                     else:
                         print(f'[DESOCUPAR] Erro em desocupar vaga de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}"')
             self.undo = undo_f
-    def reservar(self) -> bool:
+    def reservar(self):
         self.text= self.do()
