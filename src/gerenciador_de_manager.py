@@ -2,7 +2,7 @@ import threading
 from requests import get,post
 from time import sleep
 
-TEMPO_POR_COMPANIA_EM_S=5 # quantidade de tempo que sera destinado a cada compania
+TEMPO_POR_COMPANIA_EM_S = 5 # quantidade de tempo que sera destinado a cada compania
 
 class Gerenciador_de_manager:
     def __init__(self,companias:dict,trajetos_para_reservar:list,who_am_i:str, semapharo_de_liberação_resolver_pedidos:threading.Semaphore, pode_fazer_reserva:bool):
@@ -18,11 +18,11 @@ class Gerenciador_de_manager:
         ## Verificamos se existe um manager no sistema
         exist_manager = self.__verificar_se_existe_manager__()
         #
-        ## se nao existir manager agente começa um ciclo ( isso acontece quando nenhuma das companias que conhecemos esta up )
-        if( not exist_manager):
-            self.init_circulo()
+        ## se não existir manager, começa um ciclo (isso acontece quando nenhuma das companhias que conhecemos está ativa)
+        if(not exist_manager):
+           self.init_circulo()
         #
-        ## Se ja esxiste uma manager esperamos o proximo ciclo para entrarmos na rotação
+        ## Se ja existir uma manager, esperamos o próximo ciclo para entrarmos na rotação
         #
 
     def init_circulo(self):

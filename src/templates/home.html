@@ -17,15 +17,83 @@
                 <li class="list-group-item" style="background-color: rgb(32, 36,36); color: #899095;">Vagas restantes: {{trecho.vagas}}.</li>
             </ul>
             <div class="card-body" style="background-color: rgb(32, 36,36)">
-                <form action='/reservar' method='POST'>
-                    <input type='hidden' id='trajeto{{i}}' name='trajeto' value='{{trecho.saida}}->{{trecho.destino}}|{{trecho.empresa}}->'>
-                    <input type='submit' class="btn btn-warning" value="Comprar">
-                </form>
+                <input type='hidden' id='trajeto{{i}}' name='trajeto' value='{{trecho.saida}}->{{trecho.destino}}|{{trecho.empresa}}->'>
+                <input id="comprar{{i}}" type='submit' class="btn btn-warning compra" value="Comprar">
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+<script>
+    function comprar() {
+        var buttons = document.getElementsByClassName('compra');
+        console.log(buttons)
+        Array.from(buttons).forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                let trajeto = document.getElementById('trajeto' + btn.id.replace(/\D/g, ''));
+                var jsonData = {
+                    trajeto: trajeto.value
+                }
+                Swal.fire({
+                    title: 'Deseja confirmar esta compra?',
+                    confirmButtonColor: '#32cd32',
+                    cancelButtonColor: '#d33',
+                    showCancelButton: true,
+                    confirmButtonText: 'Comprar',
+                    showLoaderOnConfirm: true,                    
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                        title: 'Processando compra',
+                        timer: 20000,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        },
+                        willClose: () => {
+                        }
+                        }).then((result) => {
+                        })
+                        $.ajax({
+                            method: 'POST',
+                            url: '/reservar',
+                            data: jsonData,
+                            success: function (response) {
+                                console.log(response)
+                                Swal.fire({
+                                    title: 'Parabéns!',
+                                    text: response,
+                                    icon: 'success',
+                                    confirmButtonText: 'Ok',
+                                    }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.replace("http://" + document.location.host);
+                                    }
+                                })
+                            },
+                            error: function (e) {
+                                console.log(e);
+                                Swal.fire({
+                                    title: 'Erro!',
+                                    text: e,
+                                    icon: 'error',
+                                    confirmButtonText: 'Ok',
+                                    }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.replace("http://" + document.location.host);
+                                    }
+                                })
+                            }
+                        });
+                    }
+                })
+            })
+        })
+    }
+
+    $(document).ready(function() {
+        comprar()
+    });
+</script>
 {% endblock %}
 {% block scripts %}
 {% endblock %}

@@ -38,17 +38,17 @@ if(t != None):
 trajetos_para_reservar:list[Reservador_trajeto] = []
 pode_reservar = Semaphore()
 bool_fazendo_reserva = False
-gerenciador_manager = Gerenciador_de_manager( companias = todas_as_companias, 
-                                             trajetos_para_reservar= trajetos_para_reservar,
-                                             who_am_i= dados['nome'],
-                                             semapharo_de_liberação_resolver_pedidos=pode_reservar, 
+gerenciador_manager = Gerenciador_de_manager(companias = todas_as_companias, 
+                                             trajetos_para_reservar = trajetos_para_reservar,
+                                             who_am_i = dados['nome'],
+                                             semapharo_de_liberação_resolver_pedidos = pode_reservar, 
                                              pode_fazer_reserva = bool_fazendo_reserva)
 
 app = Flask(__name__)
 
 def __get_whitch_companies_is_up__():
     returned = []
-    companias:dict = todas_as_companias.copy() # caso uma companias seja adicionada emquanto loopamos pelas companias isso faz com q nao quebre
+    companias:dict = todas_as_companias.copy() # caso uma companhia seja adicionada emquanto loopamos pelas companias isso faz com q nao quebre
     for companie,href in companias.items():
         if(companie != dados['nome']):
             try:
@@ -81,7 +81,7 @@ def set_ordem_manager():
 
 @app.route('/get_ordem_manager', methods=['GET'])
 def get_ordem_manager():
-    return jsonify(gerenciador_manager.companias),200
+    return jsonify(gerenciador_manager.companias), 200
 
 @app.route('/ciclo_iniciar', methods=['GET'])
 def ciclo_iniciar():
@@ -119,13 +119,14 @@ def __render_home_with_text__(text=''):
         return render_template('text.html', base_context=__get_base_context__(), text = text)
 @app.route('/reservar', methods=['POST'])
 def reservar_trajetos():
-    r = Reservador_trajeto(request.form['trajeto'], href_companias=todas_as_companias)
+    r = Reservador_trajeto(request.form['trajeto'], href_companias = todas_as_companias)
     # return __render_home_with_text__(text=r.reservar())
     trajetos_para_reservar.append(r)
     while not(r.status == "Erro" or r.status == "Reservado"):
         # print(r.status,(r.status != "Erro" or r.status != "Reservado"))
         sleep(1)
-    return __render_home_with_text__(text=r.text)
+    # return __render_home_with_text__(text=r.text)
+    return r.text
 
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():

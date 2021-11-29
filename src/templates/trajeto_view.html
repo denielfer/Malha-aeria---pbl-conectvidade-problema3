@@ -11,99 +11,62 @@
         display:flex;
         flex-direction: row;
     }
+    .list-group-item {
+        background-color: rgb(32, 36,36);
+        color: #899095;
+    }
 </style>
 {% endblock %}
 {% block content %}
 {% if success %}
-<div style="background-color: rgb(30, 37, 36);">
+<div>
     {% for i, trajeto in resultado %}
-        <form action='/reservar' method='POST'>
-        <div id="display_viagem{{i}}" class="mx-4 mb-4 card" style="background-color: rgb(32, 36,36)">
-                <div class="card-body" style="background-color: rgb(32, 36,36)">
-                    <h5 class="card-title" style="background-color: rgb(32, 36,36)">Trajeto {{ i }}</h5>
-                    <div class="row" style="background-color: rgb(32, 36,36)">
+        <div id="display_viagem{{i}}" class="mx-4 mb-4 card" style="background-color: #1e2524!important">
+                <div class="card-body">
+                    <h5 class="card-title">Trajeto {{ i }}</h5>
+                    <div class="row">
                     {% for n, saida, destino, opções, is_not_final in trajeto %}
-                        <div class="col" style="background-color: rgb(32, 36,36)">
-                            <ul class="list-inline center" style="background-color: rgb(32, 36,36)">
+                        <div class="col">
+                            <ul class="list-inline center">
                                 <li id='saida_trecho{{i}}{{n}}' class="list-inline-item card-text">{{ saida }}</li>
                                 <li class="list-inline-item card-text"><i class="fas fa-plane"></i></li>
                                 <li id='destino_trecho{{i}}{{n}}' class="list-inline-item card-text">{{ destino }}</li>
-                                
                             </ul>
-                            <select id='trecho{{i}}{{n}}' class="form-control" onChange = alterar_descrição('{{i}}','{{n}}') style="background-color: rgb(32, 36,36); color: #899095;">
+                            <select id='trecho{{i}}{{n}}' class="form-control" onChange = alterar_descrição('{{i}}','{{n}}')>
                                 {% for trecho in opções %}
                                     <option value='{{trecho.opção}}'>Opção {{trecho.opção}}</option>
                                 {% endfor %}
                             </select>
-                            <ul id='descrição{{i}}{{n}}' class="list-group list-group-flush" style="background-color: rgb(32, 36,36); color: #899095;">
+                            <ul id='descrição{{i}}{{n}}' class="list-group list-group-flush">
                                {% for trecho in opções %}
                                     <div {%if trecho.display%}{%else%}hidden{%endif%}>
-                                        <li class="list-group-item" style="background-color: rgb(32, 36,36); color: #899095;">Companhia: {{ trecho.compania }}</li>
-                                        <li class="list-group-item" style="background-color: rgb(32, 36,36); color: #899095;">Preço: R${{ trecho.custo }}</li>
-                                        <li class="list-group-item" style="background-color: rgb(32, 36,36); color: #899095;">Duração do voo: {{ trecho.tempo }}h</li>
-                                        <li class="list-group-item" style="background-color: rgb(32, 36,36); color: #899095;">Vagas:{{ trecho.vagas }}</li>
+                                        <li class="list-group-item">Companhia: {{ trecho.compania }}</li>
+                                        <li class="list-group-item">Preço: R${{ trecho.custo }}</li>
+                                        <li class="list-group-item">Duração do voo: {{ trecho.tempo }}h</li>
+                                        <li class="list-group-item">Vagas:{{ trecho.vagas }}</li>
                                     </div>
                                 {% endfor %}
                             </ul>
                         </div>
                         {%if is_not_final %}
                         <div class="col-1" style="max-width: 20px;">
-                            <i class="fas fa-angle-double-right" style="background-color: rgb(32, 36,36); color: #899095;"></i>
+                            <i class="fas fa-angle-double-right"></i>
                         </div>
                         {% endif %}
                     {% endfor %}
                     </div>
                 </div>
-                <ul id='resultado{{i}}' class="list-group list-group-flush" style="background-color: rgb(32, 36,36); color: #899095;">
-                    <li id='custo{{i}}' class="list-group-item" style="background-color: rgb(32, 36,36); color: #899095;">Custo total:</li>
-                    <li id='tempo{{i}}' class="list-group-item" style="background-color: rgb(32, 36,36); color: #899095;">Tempo total:</li>
+                <ul id='resultado{{i}}' class="list-group list-group-flush">
+                    <li id='custo{{i}}' class="list-group-item">Custo total:</li>
+                    <li id='tempo{{i}}' class="list-group-item">Tempo total:</li>
                     <input type='hidden' id='trajeto{{i}}' name='trajeto' value=''>
                 </ul>
                 <div class="card-body">
-                    <input class="btn btn-warning" type="submit" value="Comprar">
+                    <input id="comprar{{i}}" class="btn btn-warning compra" type="submit" value="Comprar">
                 </div>
             </div>
-        </form>
     {% endfor %}
 </div>
-<!-- {%for i,trajeto in resultado%}
-        <form action='/reservar' method='POST'>
-            <div class='viajem_display' id="display_viagem{{i}}">
-                Trajeto {{i}}
-                {%for n,saida,destino,opções,is_not_final in trajeto%}
-                    <div style='display:block; margin-right: 20px;display:block;'>
-                        <div style=' max-height: 20px; display: flex;flex-direction: row;'>
-                            <p id='saida_trecho{{i}}{{n}}'> {{saida}}</p><p style='margin-left: 3px;'>  &#9992; </p><p  style='margin-left: 3px;' id='destino_trecho{{i}}{{n}}'>{{destino}}</p><p  style='margin-left: 3px;'>   {%if is_not_final %} &#8658; {%endif%}    </p>
-                        </div>
-                        <div style='margin-top:20px; top:20px;left:0; max-height: 80px;'>
-                            <select id='trecho{{i}}{{n}}' onChange=alterar_descrição('{{i}}','{{n}}')>
-                                <!--name='{{saida}}-{{destino}}:'
-                                {%for trecho in opções%}
-                                    <option value='{{trecho.opção}}' >opição {{trecho.opção}}</option>
-                                {%endfor%}
-                            </select>   
-                            <div id='descrição{{i}}{{n}}'>
-                                {%for trecho in opções%}
-                                    <p {% if trecho.display==False%}hidden{%endif%}>
-                                        Compania: {{trecho.compania}}<br>
-                                        Preço: R${{trecho.custo}}<br> 
-                                        Duração do voo: {{trecho.tempo}}h<br>
-                                        Vagas:{{trecho.vagas}}
-                                    </p>
-                                {%endfor%}
-                            </div>
-                        </div>
-                    </div>
-                {%endfor%}
-                <div id='resultado{{i}}'>
-                    <p>Custo total:</p>
-                    <p>Tempo total:</p>
-                    <input type='hidden' id='trajeto{{i}}' name='trajeto' value=''>
-                    <input type="submit" value='Comprar'>
-                </div>
-            </div>
-        </form>
-    {%endfor%} -->
 {% else %}
 <div class='center'>
     <h1>Não foi possível chegar a "{{ destino }}" a partir de "{{ saida }}"</h1>
@@ -145,7 +108,7 @@
                 // console.log(custo)
                 // console.log(tempo)
             }else{
-                path+=document.getElementById(`destino_trecho${id}${i-1}`).textContent+'|'+companias
+                path += document.getElementById(`destino_trecho${id}${i-1}`).textContent+'|'+companias
                 document.getElementById(`trajeto${id}`).value = path
                 break
             }
@@ -156,7 +119,9 @@
         c.textContent = `Custo total: R$${custo.toFixed(2)}`
         t.textContent = `Tempo total: ${tempo.toFixed(2)}h`
     }
+
     make_all_results()
+    
     function alterar_descrição(index_trajeto,index_trecho){
         let select = document.getElementById(`trecho${index_trajeto}${index_trecho}`).value -1
         // console.log(select)
@@ -168,5 +133,74 @@
         }
         make_resultados(index_trajeto)
     }
+
+    function comprar() {
+        var buttons = document.getElementsByClassName('compra');
+        console.log(buttons)
+        Array.from(buttons).forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                let trajeto = document.getElementById('trajeto' + btn.id.replace(/\D/g, ''));
+                var jsonData = {
+                    trajeto: trajeto.value
+                }
+                Swal.fire({
+                    title: 'Deseja confirmar esta compra?',
+                    confirmButtonColor: '#32cd32',
+                    cancelButtonColor: '#d33',
+                    showCancelButton: true,
+                    confirmButtonText: 'Comprar',
+                    showLoaderOnConfirm: true,                    
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                        title: 'Processando compra',
+                        timer: 20000,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        },
+                        willClose: () => {
+                        }
+                        }).then((result) => {
+                        })
+                        $.ajax({
+                            method: 'POST',
+                            url: '/reservar',
+                            data: jsonData,
+                            success: function (response) {
+                                console.log(response)
+                                Swal.fire({
+                                    title: 'Parabéns!',
+                                    text: response,
+                                    icon: 'success',
+                                    confirmButtonText: 'Ok',
+                                    }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.replace("http://" + document.location.host);
+                                    }
+                                })
+                            },
+                            error: function (e) {
+                                console.log(e);
+                                Swal.fire({
+                                    title: 'Erro!',
+                                    text: e,
+                                    icon: 'error',
+                                    confirmButtonText: 'Ok',
+                                    }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.replace("http://" + document.location.host);
+                                    }
+                                })
+                            }
+                        });
+                    }
+                })
+            })
+        })
+    }
+
+    $(document).ready(function() {
+        comprar()
+    });
 </script>
 {% endblock %}

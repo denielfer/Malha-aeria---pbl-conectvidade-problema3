@@ -3,7 +3,7 @@ import requests
 class Reservador_trajeto:
     def __init__(self, trajeto:str, href_companias:list[dict], do = None, undo = None):
         # print(f'{trajeto=}')
-        cidades,companias = trajeto.split('|')
+        cidades, companias = trajeto.split('|')
         self.cidades = [cidade.strip('->') for cidade in cidades.split('->')]
         self.companias = [companhia.strip('->') for companhia in companias.split('->')][:-1]
         self.hrefs_action = []
@@ -45,7 +45,7 @@ class Reservador_trajeto:
                         print(f'[OCUPAR] Erro em ocupar vaga de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}"')
                         self.undo()
                         return f'Erro em Reservar vagas, o número máximo de vagas do voo de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}". Nenhuma vaga foi reservada.'
-                self.status='Reservado'
+                self.status = 'Reservado'
                 return 'Vagas reservadas com sucesso'
             self.do = do_f
         if(undo == None):
