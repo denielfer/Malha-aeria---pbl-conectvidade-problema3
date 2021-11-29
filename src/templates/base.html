@@ -13,6 +13,7 @@
             body {
             background-color: #121212 !important;
             color: #899095;
+            overflow-x: hidden;
             }
             a {
             color: #dee2e6;
@@ -47,30 +48,32 @@
         </scripts>
     </head>
     <body>
-        <nav class="navbar navbar-dark">
-            <div class="container-fluid">
-              <a href='/' class="navbar-brand">Home</a>
-              <ul class="list-inline">
-                {% for companhia, is_on in base_context.compania_is_up %}
-                <li class="list-inline-item">{{companhia}}:
-                    {% if is_on %}
-                    <i class="fas fa-check" style="color: green;"></i>
-                    {% else %}
-                    <i class="fas fa-times" style="color: red;"></i>
-                    {% endif %} 
-                </li>
-                {% endfor %}
-              </ul>
-              <form action="/ver_trajetos/" method="POST">
-                <label for='saida'>Saida:</label>
-                <input class="" name='saida' id='saida' type="text">
-                <label for='destino'>Destino:</label>
-                <input class="" name='destino' id='destino' type="text">
-                <input type='submit' class="mx-3 btn btn-warning" value='Buscar'>
-              </form>
-            </div>
-        </nav>
-        <hr>
+        <div style="position:-webkit-sticky; position:sticky; top:0; z-index: 1; background-color: #121212;">
+            <nav class="navbar navbar-dark">
+                <div class="container-fluid">
+                  <a href='/' class="navbar-brand">Home</a>
+                  <ul class="list-inline">
+                    {% for companhia, is_on in base_context.compania_is_up %}
+                    <li class="list-inline-item">{{companhia}}:
+                        {% if is_on %}
+                        <i class="fas fa-check" style="color: green;"></i>
+                        {% else %}
+                        <i class="fas fa-times" style="color: red;"></i>
+                        {% endif %} 
+                    </li>
+                    {% endfor %}
+                  </ul>
+                  <form action="/ver_trajetos/" method="POST">
+                    <label for='saida'>Saida:</label>
+                    <input class="" name='saida' id='saida' type="text">
+                    <label for='destino'>Destino:</label>
+                    <input class="" name='destino' id='destino' type="text">
+                    <input type='submit' class="mx-3 btn btn-warning" value='Buscar'>
+                  </form>
+                </div>
+            </nav>
+            <hr>
+        </div>
         {% block content %}
         {% endblock %}
         {% block scripts %}

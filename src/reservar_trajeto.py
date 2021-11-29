@@ -50,7 +50,6 @@ class Reservador_trajeto:
             self.do = do_f
         if(undo == None):
             def undo_f():
-                self.status="Erro"
                 for i, companhia in enumerate(self.companias_done):
                     try:
                         resp = requests.get(self.href_undo[i])
@@ -63,6 +62,7 @@ class Reservador_trajeto:
                         pass
                     else:
                         print(f'[DESOCUPAR] Erro em desocupar vaga de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}"')
+                self.status="Erro"
             self.undo = undo_f
     def reservar(self):
         self.text= self.do()

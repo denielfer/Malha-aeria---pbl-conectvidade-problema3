@@ -5,7 +5,7 @@
 <div>
     <h1 class='text-center my-3'>Voos disponíveis:</h1>
     <div class="row">
-        {% for trecho in trechos %}
+        {% for i,trecho in trechos %}
         <div class="col-lg-4 mx-4 mb-4 card" style="width: 18rem; background-color: rgb(32, 36,36)">
             <div class="card-body">
                 <h5 class="card-title" style="background-color: rgb(32, 36,36); color: #899095;"><i class="fas fa-plane-departure"></i> De <b>{{ trecho.saida }}</b></h5>
@@ -27,10 +27,13 @@
 <script>
     function comprar() {
         var buttons = document.getElementsByClassName('compra');
-        console.log(buttons)
+        // console.log(buttons)
         Array.from(buttons).forEach(function(btn) {
-            btn.addEventListener('click', function() {
+            // console.log('trajeto' + btn.id.replace(/\D/g, ''))
+            btn.addEventListener('click', function(e) {
                 let trajeto = document.getElementById('trajeto' + btn.id.replace(/\D/g, ''));
+                // console.log("___________________")
+                // console.log(trajeto)
                 var jsonData = {
                     trajeto: trajeto.value
                 }
@@ -60,13 +63,13 @@
                             success: function (response) {
                                 console.log(response)
                                 Swal.fire({
-                                    title: 'Parabéns!',
-                                    text: response,
-                                    icon: 'success',
+                                    title: response.success? 'Parabéns!':'Ops vagas esgotadas :(',
+                                    text: response.text,
+                                    icon: response.success? 'success':'error',
                                     confirmButtonText: 'Ok',
                                     }).then((result) => {
                                     if (result.isConfirmed) {
-                                        window.location.replace("http://" + document.location.host);
+                                        window.location.reload(true);
                                     }
                                 })
                             },
@@ -74,7 +77,7 @@
                                 console.log(e);
                                 Swal.fire({
                                     title: 'Erro!',
-                                    text: e,
+                                    text: "Parece que o servidor esta offline porfavor tente novamente mais tarde",
                                     icon: 'error',
                                     confirmButtonText: 'Ok',
                                     }).then((result) => {

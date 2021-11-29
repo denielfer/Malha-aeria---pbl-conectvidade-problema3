@@ -115,8 +115,10 @@ def inicializar(companias,nome,self_href,todas_as_companias):
     # assim as que ja estavam no sistema e nos nao conheciamos sao conhecidos por todos
 
 def inicializar_ring(companias,todas_as_companias):
+    print('propagando informaçoes')
     __propagate__(companias,todas_as_companias) # emviamos para todas que conhecemos todas as que conhecemos ( incluindo agente )
     ordens = {}
+    print("colhendo informações do ring")
     for compania,href in companias.items():
         try:
             resp = get(f'{href}/get_ordem_manager').json()
@@ -124,6 +126,7 @@ def inicializar_ring(companias,todas_as_companias):
             continue
         ordens[compania]=resp
     base_ordem = None
+    print('confirmando ')
     for ordem in ordens.values():
         if(base_ordem is None):
             base_ordem = ordem

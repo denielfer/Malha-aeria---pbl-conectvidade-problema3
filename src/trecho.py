@@ -21,6 +21,7 @@ class Trecho:
             self.quantidade_de_vagas_ocupadas += 1
             returned = True
         self.mutex.release()
+        print('vagas ocupadas: ',self.quantidade_maxima_de_vagas - self.quantidade_de_vagas_ocupadas)
         return returned
     
     def liberar_vaga(self) -> bool:
@@ -30,6 +31,7 @@ class Trecho:
             self.quantidade_de_vagas_ocupadas -= 1
             returned = True
         self.mutex.release()
+        print('vagas ocupadas: ',self.quantidade_maxima_de_vagas - self.quantidade_de_vagas_ocupadas)
         return returned
 
     def get_vagas_livres(self):

@@ -66,7 +66,7 @@ def home():
     v = dados['voos']
     for n, a in enumerate(v): # inplace operation
         a['vagas'] = dados['trajetos'].trechos[n].get_vagas_livres()
-    return render_template('home.html', base_context = __get_base_context__(), trechos = v)
+    return render_template('home.html', base_context = __get_base_context__(), trechos = enumerate(v))
 
 @app.route('/fazendo_operação', methods=['GET'])
 def fazendo_operação():
@@ -126,7 +126,8 @@ def reservar_trajetos():
         # print(r.status,(r.status != "Erro" or r.status != "Reservado"))
         sleep(1)
     # return __render_home_with_text__(text=r.text)
-    return r.text
+    success = r.status == "Reservado"
+    return jsonify({'success':success,'text':r.text}), 200
 
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():
