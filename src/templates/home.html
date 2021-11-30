@@ -24,79 +24,9 @@
         {% endfor %}
     </div>
 </div>
-<script>
-    function comprar() {
-        var buttons = document.getElementsByClassName('compra');
-        // console.log(buttons)
-        Array.from(buttons).forEach(function(btn) {
-            // console.log('trajeto' + btn.id.replace(/\D/g, ''))
-            btn.addEventListener('click', function(e) {
-                let trajeto = document.getElementById('trajeto' + btn.id.replace(/\D/g, ''));
-                // console.log("___________________")
-                // console.log(trajeto)
-                var jsonData = {
-                    trajeto: trajeto.value
-                }
-                Swal.fire({
-                    title: 'Deseja confirmar esta compra?',
-                    confirmButtonColor: '#32cd32',
-                    cancelButtonColor: '#d33',
-                    showCancelButton: true,
-                    confirmButtonText: 'Comprar',
-                    showLoaderOnConfirm: true,                    
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire({
-                        title: 'Processando compra',
-                        timer: 20000,
-                        didOpen: () => {
-                            Swal.showLoading()
-                        },
-                        willClose: () => {
-                        }
-                        }).then((result) => {
-                        })
-                        $.ajax({
-                            method: 'POST',
-                            url: '/reservar',
-                            data: jsonData,
-                            success: function (response) {
-                                console.log(response)
-                                Swal.fire({
-                                    title: response.success? 'Parabéns!':'Ops vagas esgotadas :(',
-                                    text: response.text,
-                                    icon: response.success? 'success':'error',
-                                    confirmButtonText: 'Ok',
-                                    }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        window.location.reload(true);
-                                    }
-                                })
-                            },
-                            error: function (e) {
-                                console.log(e);
-                                Swal.fire({
-                                    title: 'Servidor Offline',
-                                    text: "Parece que o servidor esta offline porfavor tente novamente mais tarde",
-                                    icon: 'error',
-                                    confirmButtonText: 'Ok',
-                                    }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        window.location.replace("http://" + document.location.host);
-                                    }
-                                })
-                            }
-                        });
-                    }
-                })
-            })
-        })
-    }
 
-    $(document).ready(function() {
-        comprar()
-    });
-</script>
+{%include "js_compar.html" %}
+    
 {% endblock %}
 {% block scripts %}
 {% endblock %}
