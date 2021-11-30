@@ -76,6 +76,7 @@ def fazendo_operação():
 @app.route('/set_ordem_manager', methods=['POST'])
 def set_ordem_manager():
     temp = {compania:href for compania,href in request.form.items()}
+    todas_as_companias = temp
     gerenciador_manager.companias = temp
     return'',200
 
@@ -296,7 +297,8 @@ def companias_conectadas():
             else: # se nao 
                 todas_as_companias[compania] = href
                 companias_out[compania] = href
-        util.propagate(companias_already_in,companias_out) # propagamos para as comapanias que ja tinhamos todas as companias que temos agora
+        if( companias_out != {}):
+            util.propagate(todas_as_companias,companias_out) # propagamos para as comapanias que ja tinhamos todas as companias que temos agora
         semapharo_add_compania.release()
         # print("///////////",todas_as_companias)
         return jsonify(todas_as_companias),200

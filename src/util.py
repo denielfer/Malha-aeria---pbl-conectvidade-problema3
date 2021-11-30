@@ -133,8 +133,8 @@ def inicializar_ring(companias,todas_as_companias):
         elif(ordem != base_ordem):
             base_ordem.update(ordem)
             change=True
-    todas_as_companias = base_ordem
-    for href in companias.values():
+    todas_as_companias = base_ordem if (base_ordem is not None) else companias
+    for href in todas_as_companias.values():
         try:
             post(f'{href}/set_ordem_manager',data = base_ordem)
         except:

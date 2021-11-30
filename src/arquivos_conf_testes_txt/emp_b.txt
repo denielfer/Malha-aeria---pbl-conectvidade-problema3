@@ -9,5 +9,4 @@
 {"saida":"f", "destino":"q", "custo":390, "tempo":0.1, "empresa":"b","quantidade_maxima_de_vagas":19}
 {"saida":"r", "destino":"t", "custo":681, "tempo":0.2, "empresa":"b","quantidade_maxima_de_vagas":9}
 {"saida":"a", "destino":"f", "custo":265, "tempo":1.0, "empresa":"b","quantidade_maxima_de_vagas":12}]
-"companias":{"a":"http://26.31.211.47:18500"
-"c":"http://26.31.211.47:18498"}
+"companias":{"c":"http://26.31.211.47:18498"}
