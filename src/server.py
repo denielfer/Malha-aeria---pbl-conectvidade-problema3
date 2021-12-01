@@ -1,3 +1,5 @@
+import threading
+from typing import Sequence
 from flask import Flask, jsonify, request, render_template
 import requests
 import sys
@@ -5,8 +7,9 @@ from gerenciador_de_trajetos import Gerenciador_de_trajetos
 from reservar_trajeto import Reservador_trajeto
 from trecho import Trecho
 import util
-# from time import sleep
-# from threading import Semaphore
+from time import sleep
+from threading import Semaphore
+from gerenciador_de_manager import Gerenciador_de_manager
 
 # dados = None
 pedidos_trajetos_pra_processar = []
@@ -15,28 +18,44 @@ dados = util.load(sys.argv)
 # print(dados)
 if(dados is None):
     raise("Caregamento de informações não foi realizada com sucesso")
-util.inicializar(dados['companias'],dados['nome'],f"http://{dados['ip']}:{dados['port']}")
+todas_as_companias = dados['companias'].copy()
+todas_as_companias[dados['nome']] = f'http://{dados["ip"]}:{dados["port"]}'
+t = util.inicializar_ring(dados['companias'],todas_as_companias)
+# print(t)
+if(t != None):
+    todas_as_companias = t
 
 # print(f"Este servidor corresponde ao da Compania: {dados['nome']} e esta sendo executado no link: http://{dados['ip']}:{dados['port']}")
 
-# trajetos_para_reservar:list[Reservador_trajeto] = []
-# fazendo_reserva = Semaphore()
+# precisamos de um dicionario com todas as companias 
+# ( o que inclui a nossa que nao esta nesse dicionario 
+# e precisa ser um dicionario que é atualizado conforme novas 
+# companias entram no sistema)
+
+# print(f'{dados=}\n\n\n{todas_as_companias=}')
+# input()
+
+trajetos_para_reservar:list[Reservador_trajeto] = []
+pode_reservar = Semaphore()
+bool_fazendo_reserva = False
+gerenciador_manager = Gerenciador_de_manager(companias = todas_as_companias, 
+                                             trajetos_para_reservar = trajetos_para_reservar,
+                                             who_am_i = dados['nome'],
+                                             semapharo_de_liberação_resolver_pedidos = pode_reservar, 
+                                             pode_fazer_reserva = bool_fazendo_reserva)
 
 app = Flask(__name__)
 
-def __get_all_href__():
-    data = dados['companias'].copy()
-    data[dados['nome']] = f"http://{dados['ip']}:{dados['port']}"
-    return data
-
 def __get_whitch_companies_is_up__():
     returned = []
-    for c in dados['companias']:
-        try:
-            request = requests.get(f'{dados["companias"][c]}/ping', timeout = 0.5)
-            returned.append((c, request.status_code == 200))
-        except Exception:
-            returned.append((c, False))
+    companias:dict = todas_as_companias.copy() # caso uma companhia seja adicionada emquanto loopamos pelas companias isso faz com q nao quebre
+    for companie,href in companias.items():
+        if(companie != dados['nome']):
+            try:
+                request = requests.get(f'{href}/ping', timeout = 0.5)
+                returned.append((companie, request.status_code == 200))
+            except Exception:
+                returned.append((companie, False))
     return returned
 
 def __get_base_context__():
@@ -47,7 +66,34 @@ def home():
     v = dados['voos']
     for n, a in enumerate(v): # inplace operation
         a['vagas'] = dados['trajetos'].trechos[n].get_vagas_livres()
-    return render_template('home.html', base_context = __get_base_context__(), trechos = v)
+    return render_template('home.html', base_context = __get_base_context__(), trechos = enumerate(v))
+
+@app.route('/fazendo_operação', methods=['GET'])
+def fazendo_operação():
+    bool_fazendo_reserva = False
+    return f'{bool_fazendo_reserva}', 201 if (bool_fazendo_reserva) else 200 # retornamos 201 se estamos fazendo operação e 200 se nao
+
+@app.route('/set_ordem_manager', methods=['POST'])
+def set_ordem_manager():
+    temp = {compania:href for compania,href in request.form.items()}
+    todas_as_companias = temp
+    gerenciador_manager.companias = temp
+    return'',200
+
+@app.route('/get_ordem_manager', methods=['GET'])
+def get_ordem_manager():
+    return jsonify(gerenciador_manager.companias), 200
+
+@app.route('/ciclo_iniciar', methods=['GET'])
+def ciclo_iniciar():
+    # print(request.form)
+    # print("___________")
+    gerenciador_manager.init_circulo()
+    return f'{gerenciador_manager.ciclo}', 200 if (gerenciador_manager.ciclo) else 0 # retornamos 201 se estamos fazendo operação e 200 se nao
+
+@app.route('/tem_manager', methods=['GET'])
+def tem_manager():
+    return f'{gerenciador_manager.manager}', 200 if (gerenciador_manager.manager is not None) else 0 
 
 @app.route('/ping', methods=['GET'])
 def ping():
@@ -57,12 +103,12 @@ def __get_self_voos__():
     return [trecho.get_info() for trecho in dados['trechos']]
 
 def __get_all_voos__():
-    hrefs = dados['companias'].copy()
-    voos = __get_self_voos__()
-    for c in hrefs:
+    hrefs:dict = todas_as_companias.copy()
+    voos = []
+    for c in hrefs.values():
         try:
             # print(hrefs[c])
-            voos += requests.get(f"{hrefs[c]}/voos", timeout = 1).json()
+            voos += requests.get(f"{c}/voos", timeout = 1).json()
         except Exception: #caso algum não responda, apenas vamos para o próximo
             pass
     return voos
@@ -74,12 +120,15 @@ def __render_home_with_text__(text=''):
         return render_template('text.html', base_context=__get_base_context__(), text = text)
 @app.route('/reservar', methods=['POST'])
 def reservar_trajetos():
-    r = Reservador_trajeto(request.form['trajeto'], href_companias=__get_all_href__())
-    return __render_home_with_text__(text=r.reservar())
-    # trajetos_para_reservar.append(r)
-    # while r.status != "Erro" or r.status != "Reservado":
-    #     sleep(0.1)
+    r = Reservador_trajeto(request.form['trajeto'], href_companias = todas_as_companias)
+    # return __render_home_with_text__(text=r.reservar())
+    trajetos_para_reservar.append(r)
+    while not(r.status == "Erro" or r.status == "Reservado"):
+        # print(r.status,(r.status != "Erro" or r.status != "Reservado"))
+        sleep(1)
     # return __render_home_with_text__(text=r.text)
+    success = r.status == "Reservado"
+    return jsonify({'success':success,'text':r.text}), 200
 
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():
@@ -128,8 +177,8 @@ def reserva_passagem(saida:str, destino:str, compania:str):
             else:
                 return f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{compania}"', 404
         return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
-    elif(compania in dados['companias']):
-        dados_compania = dados['companias'][compania]
+    elif(compania in todas_as_companias):
+        dados_compania = todas_as_companias[compania]
         href = f"http://{dados_compania['ip']}:{dados_compania['port']}/ocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href, timeout=60)
@@ -159,8 +208,8 @@ def desreservar_passagem(saida:str, destino:str, compania:str):
             else:
                 return  f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{compania}"', 200
         return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
-    elif(compania in dados['companias']):
-        dados_compania = dados['companias'][compania]
+    elif(compania in todas_as_companias):
+        dados_compania = todas_as_companias[compania]
         href = f"http://{dados_compania['ip']}:{dados_compania['port']}/desocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href, timeout=60)
@@ -180,14 +229,7 @@ def voos():
 
 @app.route('/all_voos', methods=['GET'])
 def all_voos():
-    returned = __get_self_voos__()
-    for compania in dados['companias']:
-        dados_compania = dados['companias'][compania]
-        try:
-            returned.append(requests.get(f"http://{dados_compania['ip']}:{dados_compania['port']}/voos", timeout=1).json())
-        except Exception: #caso algum não responda, apenas vamos para o próximo
-            pass
-    return jsonify(returned), 200
+    return jsonify(__get_all_voos__()), 200
 
 @app.route('/add_voo', methods=['GET',"POST"])
 def add_voo():
@@ -210,46 +252,56 @@ def add_voo():
         dados['trajetos'].add_voo(trecho)
         return __render_home_with_text__(text=f'O voo de {trecho.saida} para {trecho.destino} foi adicionado, com custo de {trecho.custo} e tempo de {trecho.tempo}'), 200
 
+semapharo_add_compania = threading.Semaphore()
+
 @app.route('/add_compania', methods=['GET', 'POST'])
 def add_compania():
     if(request.method == "GET"):
         return render_template('add_compania.html', base_context=__get_base_context__())
     else:
+        semapharo_add_compania.acquire()
         try:
-            util.propagate(dados['companias'],{request.form['compania']:request.form["href"]})
+            temp = todas_as_companias.copy()
+            if(dados['nome'] in temp):
+                del(temp[dados['nome']])
+            util.propagate(temp,{request.form['compania']:request.form["href"]},todas_as_companias)
             dados["companias"][request.form['compania']] = request.form["href"]
+            todas_as_companias[request.form['compania']] = request.form["href"]
+            semapharo_add_compania.release()
             util.__escrever_binario_de_conf__(dados)
             return  __render_home_with_text__(text=f'a compania: {request.form["compania"]} for adicionada a lista de companias afiliadas. A api desta compania se encontra na porta: {request.form["href"]}'),200
         except Exception: # caso o formulario nao tenha os campos que buscamos
+            semapharo_add_compania.release()
             return  __render_home_with_text__(text='NA MORAL? METEU ESSA MERMO?'),404
 
 @app.route('/companias_conectadas', methods=['GET', 'POST'])
 def companias_conectadas():
     if(request.method == "GET"):
-        return jsonify(dados['companias']),200
+        temp = todas_as_companias.copy()
+        if(dados['nome'] in temp):
+            del(temp[dados['nome']])
+        return jsonify(temp),200
     else:
+        semapharo_add_compania.acquire()
         try:
             # print(request.form)
             companias_to_check = request.form # companias passadas no request
         except Exception:
             return '',404
+        # print("-----------",companias_to_check)
         companias_already_in={}
-        companias_out={}
+        companias_out = {}
         for compania,href in companias_to_check.items(): # para as companias recebidas no post
-            if(compania in dados['companias'] and dados['companias'][compania] == href): # se ela ja estiver nos dados e o href for o passado
+            if(compania in todas_as_companias and todas_as_companias[compania] == href): # se ela ja estiver nos dados e o href for o passado
                 companias_already_in[compania] = href # adicionanos nas companias que ja tinhamos
-            elif(compania == dados['nome']):
-                pass
             else: # se nao 
-                companias_out[compania] = href # adicionamos nas companias que nao tinhamos
-                dados['companias'][compania] = href # adicionamos ela nas companias que guardados
-        util.propagate(companias_already_in,dados['companias']) # propagamos para as comapanias que ja tinhamos as companias que nao tinhamos 
-        # if(dados['companias'] != companias_to_check):
-        #     dados['companias'].update(companias_to_check)
-            # t = dados['companias'].copy()
-            # util.propagate(t,t) 
-        # print(dados['companias'])
-        return '',200
+                todas_as_companias[compania] = href
+                companias_out[compania] = href
+        if( companias_out != {}):
+            util.propagate(todas_as_companias,companias_out) # propagamos para as comapanias que ja tinhamos todas as companias que temos agora
+        semapharo_add_compania.release()
+        # print("///////////",todas_as_companias)
+        return jsonify(todas_as_companias),200
 
 if(__name__== "__main__"):
     print( dados['ip'], dados['port'])

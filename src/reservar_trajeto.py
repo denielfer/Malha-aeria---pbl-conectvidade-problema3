@@ -3,7 +3,7 @@ import requests
 class Reservador_trajeto:
     def __init__(self, trajeto:str, href_companias:list[dict], do = None, undo = None):
         # print(f'{trajeto=}')
-        cidades,companias = trajeto.split('|')
+        cidades, companias = trajeto.split('|')
         self.cidades = [cidade.strip('->') for cidade in cidades.split('->')]
         self.companias = [companhia.strip('->') for companhia in companias.split('->')][:-1]
         self.hrefs_action = []
@@ -26,8 +26,8 @@ class Reservador_trajeto:
         # print()
         # print("________________")
         if(do == None):
-            self.status = 'reservando'
             def do_f():
+                self.status = 'reservando'
                 for i, companhia in enumerate(self.companias):
                     try:
                         resp = requests.get(self.hrefs_action[i], timeout=10)
@@ -45,12 +45,11 @@ class Reservador_trajeto:
                         print(f'[OCUPAR] Erro em ocupar vaga de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}"')
                         self.undo()
                         return f'Erro em Reservar vagas, o número máximo de vagas do voo de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}". Nenhuma vaga foi reservada.'
-                self.status='Reservado'
+                self.status = 'Reservado'
                 return 'Vagas reservadas com sucesso'
             self.do = do_f
         if(undo == None):
             def undo_f():
-                self.status="Erro"
                 for i, companhia in enumerate(self.companias_done):
                     try:
                         resp = requests.get(self.href_undo[i])
@@ -63,6 +62,7 @@ class Reservador_trajeto:
                         pass
                     else:
                         print(f'[DESOCUPAR] Erro em desocupar vaga de "{saida.strip("/")}" para "{destino.strip("/")}" pela companhia "{companhia.strip("/")}"')
+                self.status="Erro"
             self.undo = undo_f
-    def reservar(self) -> bool:
+    def reservar(self):
         self.text= self.do()
