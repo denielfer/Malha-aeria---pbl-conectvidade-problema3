@@ -57,7 +57,6 @@ class Gerenciador_de_manager:
                         sleep(.2) # esperando 200 ms para pergunta dinovo
                 # entao o loop continua passando para o proximo manger
             self.ciclo = False
-            self.manager = None
 
     def start_resolver_pedidos(self):
         # if(len(self.trajetos_para_reservar) > 0): # se tivermos trajetos para resolver
