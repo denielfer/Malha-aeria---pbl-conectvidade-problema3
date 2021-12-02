@@ -27,15 +27,18 @@ class Gerenciador_de_manager:
 
     def init_circulo(self):
         if(self.thread is None):
-            self.thread = threading.Thread(target=self.__main_loop__)
-            self.thread.setDaemon(True)
-            self.thread.start()
+            semafaro = threading.Semaphore()
+            semafaro.acquire()
+            thread = threading.Thread(target=self.__main_loop__,kwargs={'semapharo':semafaro})
+            thread.setDaemon(True)
+            thread.start()
+            self.thread = (thread,semafaro)
 
-    def __main_loop__(self):
-        while True:
+    def __main_loop__(self,semapharo:threading.Semaphore):
+        while not semapharo.acquire(False):
             self.temp_companias = list(self.companias) # fazemos uma copia para o caso de ter alteração nao quebrar o loop ( assim companias adicionadas depois ficariam para proxima rotação )
             self.esperar_nova_rodada()
-            sleep(.1)
+            sleep(1)
             print('[Gerenciador de manager] rodada começada')
             self.ciclo = True
             while(len(self.temp_companias) > 0): # enquanto todas as companias nao forem managers
@@ -55,6 +58,9 @@ class Gerenciador_de_manager:
                         sleep(.2) # esperando 200 ms para pergunta dinovo
                 # entao o loop continua passando para o proximo manger
             self.ciclo = False
+        semapharo.release()
+        del(semapharo)
+        print(f"[Gerenciador Manager] finalizando")
 
     def start_resolver_pedidos(self):
         semapharo_resolvendo_pedido:threading.Semaphore = self.init_thread_resolver_pedidos()
@@ -126,6 +132,11 @@ class Gerenciador_de_manager:
             break # assim que acharmos manager em 1 companias podemos para de procuirar
         return existe_manager
 
+    def end_afther_ciclo(self):
+        thread,semafaro = self.thread
+        semafaro.release()
+        self.thread = None
+        
 
 if __name__ == "__main__":
     a = {1:12}

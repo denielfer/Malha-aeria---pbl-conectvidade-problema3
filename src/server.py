@@ -15,6 +15,7 @@ pedidos_trajetos_pra_processar = []
 dados = util.load(sys.argv)
 if(dados is None):
     raise("Caregamento de informações não foi realizada com sucesso")
+global todas_as_companias # existe uma variavel global chamada todas_as_companias
 todas_as_companias = dados['companias'].copy()
 todas_as_companias[dados['nome']] = f'http://{dados["ip"]}:{dados["port"]}'
 t = util.inicializar_ring(dados['companias'],todas_as_companias)
@@ -63,6 +64,7 @@ def fazendo_operação():
 @app.route('/set_ordem_manager', methods=['POST'])
 def set_ordem_manager():
     temp = {compania:href for compania,href in request.form.items()}
+    global todas_as_companias
     todas_as_companias = temp
     gerenciador_manager.companias = temp
     return'',200
@@ -215,7 +217,7 @@ def add_voo():
         dados['voos'].append(novo_voo)
         util.__escrever_binario_de_conf__(dados)
         trecho = Trecho(**novo_voo)
-        dados['trechos'].append(trecho)
+        #dados['trechos'].append(trecho)
         dados['trajetos'].add_voo(trecho)
         return __render_home_with_text__(text=f'O voo de {trecho.saida} para {trecho.destino} foi adicionado, com custo de {trecho.custo} e tempo de {trecho.tempo}'), 200
 
@@ -226,20 +228,38 @@ def add_compania():
     if(request.method == "GET"):
         return render_template('add_compania.html', base_context=__get_base_context__())
     else:
+        global todas_as_companias # para informamos ao python que nao estamos criando uma variavel local chamada todas_as_companias e sim usando a global
         semapharo_add_compania.acquire()
         try:
             temp = todas_as_companias.copy()
             if(dados['nome'] in temp):
                 del(temp[dados['nome']])
-            util.propagate(temp,{request.form['compania']:request.form["href"]},todas_as_companias)
             dados["companias"][request.form['compania']] = request.form["href"]
             todas_as_companias[request.form['compania']] = request.form["href"]
+            temp = todas_as_companias
+            t = util.inicializar_ring(dados['companias'],todas_as_companias)
+            if(t != None and t.items()!=todas_as_companias.items()): # se tiver resposta de outras companias
+                todas_as_companias = t
+                gerenciador_manager.companias = t
+                gerenciador_manager.end_afther_ciclo()
+                for href in temp:
+                    try:
+                        requests.get(f'{href}/end_after_cicle')
+                    except Exception:
+                        pass
             semapharo_add_compania.release()
             util.__escrever_binario_de_conf__(dados)
             return  __render_home_with_text__(text=f'a compania: {request.form["compania"]} for adicionada a lista de companias afiliadas. A api desta compania se encontra na porta: {request.form["href"]}'),200
-        except Exception: # caso o formulario nao tenha os campos que buscamos
+        except Exception as e: # caso o formulario nao tenha os campos que buscamos
             semapharo_add_compania.release()
             return  __render_home_with_text__(text='NA MORAL? METEU ESSA MERMO?'),404
+
+@app.route('/end_after_cicle', methods=['GET'])
+def end_after_cicle():
+    gerenciador_manager.end_afther_ciclo()
+    return '',200
+    
+
 
 @app.route('/companias_conectadas', methods=['GET', 'POST'])
 def companias_conectadas():
