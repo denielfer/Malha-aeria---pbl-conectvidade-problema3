@@ -166,16 +166,17 @@ def reserva_passagem(saida:str, destino:str, compania:str):
     Rota não pública para uso interno
     '''
     if(compania == dados["nome"]):
-        caminho = dados['trajetos'].find_from_to(saida, destino)
-        if(caminho == None):
-            return "Trajeto indicado nao foi encontrado", 404
-        caminho = caminho[0]
-        if (caminho):
-            if(dados['trechos'][caminho['index']].ocupar_vaga()):
-                return 'Assento alocado', 200
-            else:
-                return f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{compania}"', 404
-        return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
+        caminhos = dados['trajetos'].find_from_to(saida, destino) # retorna None se nao tiver caminho se tiver retorna lista com trechos
+        if(caminhos is None):
+            return "Trajeto indicado nao foi encontrado", 404 # caso a compania nao tenha o trecho solicitado retornamos que o trajeto pedido nao existe
+        for caminho in caminhos: # se tivermos mais de um quer dizer q a compania ofere mais de um vol de {saida} para {destino} entao se nao der pra ocupar vaga em um tentaremos no proximo
+#        caminho = caminhos[0]
+#            if (caminho):
+            if(dados['trechos'][caminho['index']].ocupar_vaga()): # se conseguimos ocupar a vaga com sucesso
+                return 'Assento alocado', 200 # retornamos ok
+#                else:
+        return f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{compania}"', 404 # se passamos por toda as opções da compania e nao foi possivel reservar retornamos que todos os assentos estao alocados ja 
+#        return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
     elif(compania in todas_as_companias):
         href = f"{todas_as_companias[compania]}/ocupar/{saida}/{destino}/{compania}"
         try:
@@ -192,16 +193,16 @@ def desreservar_passagem(saida:str, destino:str, compania:str):
     Rota não pública para uso interno
     '''
     if(compania == dados["nome"]):# se for do nosso servidor o desocupamos a vaga
-        caminho = dados['trajetos'].find_from_to(saida,destino)
-        if(caminho == None):
-            return "Trajeto indicado não foi encontrado", 404
-        caminho = caminho[0]
-        if (caminho):
-            if(dados['trechos'][caminho['index']].liberar_vaga()):
-                return 'Assento desalocado',200
-            else:
-                return  f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{compania}"', 200
-        return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
+        caminhos = dados['trajetos'].find_from_to(saida, destino) # retorna None se nao tiver caminho se tiver retorna lista com trechos
+        if(caminhos is None):
+            return "Trajeto indicado não foi encontrado", 404 # caso a compania nao tenha o trecho solicitado retornamos que o trajeto pedido nao existe
+        # se tivermos mais de um quer dizer q a compania ofere mais de um vol de {saida} para {destino} entao se nao der pra desocupar vaga em um tentaremos no proximo 
+        # ( assim ainda nao existe suporte para desocupar acento de um voos especifico caso 2 ou mais voos da mesma compania fassam o mesmo trecho, assim ele vai liberando 
+        # vagas na ordem na qual os trechos foram colocados no arquivo de conf, ou adicionados posteriormente )
+        for caminho in caminhos: 
+            if(dados['trechos'][caminho['index']].liberar_vaga()): # se conseguimos liberar a vaga com sucesso
+                return 'Assento desalocado',200 # retornamos ok
+        return  f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{compania}"', 404 # se passamos por toda as opções da compania e nao foi possivel reservar retornamos que todos os assentos estao alocados ja 
     elif(compania in todas_as_companias): # se o pedido for pra um servidor conhecido repassamos o request para ele
         href = f"{todas_as_companias[compania]}/desocupar/{saida}/{destino}/{compania}"
         try:
