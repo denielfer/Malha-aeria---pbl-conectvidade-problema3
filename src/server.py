@@ -1,5 +1,4 @@
 import threading
-from typing import Sequence
 from flask import Flask, jsonify, request, render_template
 import requests
 import sys
@@ -178,17 +177,12 @@ def reserva_passagem(saida:str, destino:str, compania:str):
                 return f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{compania}"', 404
         return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
     elif(compania in todas_as_companias):
-        dados_compania = todas_as_companias[compania]
-        href = f"http://{dados_compania['ip']}:{dados_compania['port']}/ocupar/{saida}/{destino}/{compania}"
+        href = f"{todas_as_companias[compania]}/ocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href, timeout=60)
         except Exception as e: #essa exception seria relacionada ao request
             return f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{compania}"', 404
-        return request.raw,request.status_code # ainda nao testado se isso sobrepoe o if else abaixo
-        if(request.status_code != 200): #se tiver uma forma mais fácil, pode tirar o if else aqui (ex: retornando o request recebido)
-            return 'Problema na reserva do trecho {saida} -> {destino} na companhia {compania}', 404
-        else:
-            return 'Assento alocado', 200
+        return request.text,request.status_code
     else:
         return  'A companhia informada não foi encontrada', 404
 
@@ -197,7 +191,7 @@ def desreservar_passagem(saida:str, destino:str, compania:str):
     '''
     Rota não pública para uso interno
     '''
-    if(compania == dados["nome"]):
+    if(compania == dados["nome"]):# se for do nosso servidor o desocupamos a vaga
         caminho = dados['trajetos'].find_from_to(saida,destino)
         if(caminho == None):
             return "Trajeto indicado não foi encontrado", 404
@@ -208,18 +202,13 @@ def desreservar_passagem(saida:str, destino:str, compania:str):
             else:
                 return  f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{compania}"', 200
         return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
-    elif(compania in todas_as_companias):
-        dados_compania = todas_as_companias[compania]
-        href = f"http://{dados_compania['ip']}:{dados_compania['port']}/desocupar/{saida}/{destino}/{compania}"
+    elif(compania in todas_as_companias): # se o pedido for pra um servidor conhecido repassamos o request para ele
+        href = f"{todas_as_companias[compania]}/desocupar/{saida}/{destino}/{compania}"
         try:
             request = requests.get(href, timeout=60)
         except Exception as e: #essa exception seria relacionada ao request
             return  f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{compania}"', 404
-        return request.raw,request.status_code #ainda não testado se isso sobrepõe o if else abaixo
-        # if(request.status_code != 200): #se tiver uma forma mais fácil, pode tirar o if else aqui (ex: retornando o request recebido)
-        #     return 'Problema na reserva do trecho {saida} -> {destino} na companhia {compania}', 404
-        # else:
-        #     return 'Assento alocado', 200
+        return request.text,request.status_code
     else:
         return 'A companhia informada não foi encontrada', 404
 
