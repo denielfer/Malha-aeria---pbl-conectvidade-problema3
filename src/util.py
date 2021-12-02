@@ -3,7 +3,6 @@ import threading
 from time import sleep
 from trecho import Trecho
 from gerenciador_de_trajetos import Gerenciador_de_trajetos
-from reservar_trajeto import Reservador_trajeto
 from requests import get,post
 
 decoder = JSONDecoder()
@@ -42,7 +41,6 @@ def __propagate__(to_which_companies,what_companies):
     to_which_companies = to_which_companies.copy()
     for href in to_which_companies.values():
         try:
-            # print(f'{what_companies=}')
             post(f'{href}/companias_conectadas',data=what_companies, timeout=5)
         except Exception:
             pass
@@ -92,14 +90,11 @@ def inicializar(companias,nome,self_href,todas_as_companias):
                     companias_avizadas.append(compania)
                 except Exception:
                     pass
-            # print(f'pergunta para: {href}')
             try:
                 resp = get(f'{href}/companias_conectadas',timeout=5)
                 resp = resp.json()
             except Exception: # se der timeout ou se nao tiver nada no json ( nao conseguir pega um json na resposta ) ou se o server estiver offline
-                # print(f' erro request para {compania}')
                 continue # segue pra proxima
-            # print(f'resposta foi: {resp}')
             companias_copy.update(resp) # se conseguio adicionamos na nossa copia ( pra nao dar problema no loop )
         if(nome in companias_copy): # apagamos a referencia desta compania do conjunto de companias conhecidas
             del(companias_copy[nome])

@@ -33,17 +33,13 @@ class Gerenciador_de_trajetos():
         success = False
         search = {f'_{saida}':[saida]}
         while search != {}:
-            # fineshed = True
-            # print(search)
             next_iteraration = {}
             for id in search:
                 cidade = id.split('_')[1]
                 if(cidade in self.trajetos):
                     vizinhos = search[id]
                     for cidade_conectada in self.trajetos[cidade]:
-                        # print(f'olhando cidade: {cidade_conectada}')
                         if(cidade_conectada not in vizinhos):
-                            # fineshed = False
                             if cidade_conectada == destino:
                                 resultado.append(vizinhos + [cidade_conectada])
                                 success = True  

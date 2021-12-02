@@ -10,29 +10,17 @@ from time import sleep
 from threading import Semaphore
 from gerenciador_de_manager import Gerenciador_de_manager
 
-# dados = None
 pedidos_trajetos_pra_processar = []
 
 dados = util.load(sys.argv)
-# print(dados)
 if(dados is None):
     raise("Caregamento de informações não foi realizada com sucesso")
 todas_as_companias = dados['companias'].copy()
 todas_as_companias[dados['nome']] = f'http://{dados["ip"]}:{dados["port"]}'
 t = util.inicializar_ring(dados['companias'],todas_as_companias)
-# print(t)
+
 if(t != None):
     todas_as_companias = t
-
-# print(f"Este servidor corresponde ao da Compania: {dados['nome']} e esta sendo executado no link: http://{dados['ip']}:{dados['port']}")
-
-# precisamos de um dicionario com todas as companias 
-# ( o que inclui a nossa que nao esta nesse dicionario 
-# e precisa ser um dicionario que é atualizado conforme novas 
-# companias entram no sistema)
-
-# print(f'{dados=}\n\n\n{todas_as_companias=}')
-# input()
 
 trajetos_para_reservar:list[Reservador_trajeto] = []
 pode_reservar = Semaphore()
@@ -85,8 +73,6 @@ def get_ordem_manager():
 
 @app.route('/ciclo_iniciar', methods=['GET'])
 def ciclo_iniciar():
-    # print(request.form)
-    # print("___________")
     gerenciador_manager.init_circulo()
     return f'{gerenciador_manager.ciclo}', 200 if (gerenciador_manager.ciclo) else 0 # retornamos 201 se estamos fazendo operação e 200 se nao
 
@@ -106,7 +92,6 @@ def __get_all_voos__():
     voos = []
     for c in hrefs.values():
         try:
-            # print(hrefs[c])
             voos += requests.get(f"{c}/voos", timeout = 1).json()
         except Exception: #caso algum não responda, apenas vamos para o próximo
             pass
@@ -120,19 +105,15 @@ def __render_home_with_text__(text=''):
 @app.route('/reservar', methods=['POST'])
 def reservar_trajetos():
     r = Reservador_trajeto(request.form['trajeto'], href_companias = todas_as_companias)
-    # return __render_home_with_text__(text=r.reservar())
     trajetos_para_reservar.append(r)
     while not(r.status == "Erro" or r.status == "Reservado"):
-        # print(r.status,(r.status != "Erro" or r.status != "Reservado"))
         sleep(1)
-    # return __render_home_with_text__(text=r.text)
     success = r.status == "Reservado"
     return jsonify({'success':success,'text':r.text}), 200
 
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():
     saida,destino = request.form['saida'], request.form['destino']
-    # print('from',saida,'to',destino)
     gerenciador = __get_gerenciador_todos_trajetos__()
     success,resultado = gerenciador.make_all_trajetos(saida=saida,destino=destino)
     lista_trajetos =[ 
@@ -170,13 +151,9 @@ def reserva_passagem(saida:str, destino:str, compania:str):
         if(caminhos is None):
             return "Trajeto indicado nao foi encontrado", 404 # caso a compania nao tenha o trecho solicitado retornamos que o trajeto pedido nao existe
         for caminho in caminhos: # se tivermos mais de um quer dizer q a compania ofere mais de um vol de {saida} para {destino} entao se nao der pra ocupar vaga em um tentaremos no proximo
-#        caminho = caminhos[0]
-#            if (caminho):
             if(dados['trechos'][caminho['index']].ocupar_vaga()): # se conseguimos ocupar a vaga com sucesso
                 return 'Assento alocado', 200 # retornamos ok
-#                else:
         return f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{compania}"', 404 # se passamos por toda as opções da compania e nao foi possivel reservar retornamos que todos os assentos estao alocados ja 
-#        return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{compania}"', 404
     elif(compania in todas_as_companias):
         href = f"{todas_as_companias[compania]}/ocupar/{saida}/{destino}/{compania}"
         try:
@@ -274,11 +251,9 @@ def companias_conectadas():
     else:
         semapharo_add_compania.acquire()
         try:
-            # print(request.form)
             companias_to_check = request.form # companias passadas no request
         except Exception:
             return '',404
-        # print("-----------",companias_to_check)
         companias_already_in={}
         companias_out = {}
         for compania,href in companias_to_check.items(): # para as companias recebidas no post
@@ -290,7 +265,6 @@ def companias_conectadas():
         if( companias_out != {}):
             util.propagate(todas_as_companias,companias_out) # propagamos para as comapanias que ja tinhamos todas as companias que temos agora
         semapharo_add_compania.release()
-        # print("///////////",todas_as_companias)
         return jsonify(todas_as_companias),200
 
 if(__name__== "__main__"):
