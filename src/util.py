@@ -139,6 +139,7 @@ def inicializar_ring(companias,todas_as_companias):
             post(f'{href}/set_ordem_manager',data = base_ordem)
         except:
             pass
+    print('inicialização terminada')
     return base_ordem
 
 
