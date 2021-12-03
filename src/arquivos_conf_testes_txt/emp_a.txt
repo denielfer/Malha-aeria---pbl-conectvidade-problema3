@@ -8,4 +8,4 @@
 {"saida":"q", "destino":"a", "custo":378, "tempo":0.57, "empresa":"a","quantidade_maxima_de_vagas":2}
 {"saida":"r", "destino":"f", "custo":461, "tempo":0.47, "empresa":"a","quantidade_maxima_de_vagas":17}
 {"saida":"a", "destino":"d", "custo":375, "tempo":0.59, "empresa":"a","quantidade_maxima_de_vagas":3}]
-"companias":{"b":"http://26.31.211.47:18499"}
+"companhias":{"b":"http://26.31.211.47:18499"}

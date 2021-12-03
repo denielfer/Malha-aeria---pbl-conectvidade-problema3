@@ -8,9 +8,9 @@ class Gerenciador_de_trajetos():
             if(trecho.destino not in self.trajetos[trecho.saida]):
                 self.trajetos[trecho.saida][trecho.destino] = []
             self.trajetos[trecho.saida][trecho.destino].append({
-                'compania': trecho.empresa,
+                'companhia': trecho.empresa,
                 'index': i,
-                'opção': len(self.trajetos[trecho.saida][trecho.destino])+1,
+                'opção': len(self.trajetos[trecho.saida][trecho.destino]) + 1,
                 'custo': trecho.custo,
                 'tempo': trecho.tempo,
                 'vagas_totais': trecho.quantidade_maxima_de_vagas})
@@ -63,7 +63,7 @@ class Gerenciador_de_trajetos():
         if(voo.destino not in self.trajetos[voo.saida]):
             self.trajetos[voo.saida][voo.destino] = []
         self.trajetos[voo.saida][voo.destino].append({
-                'compania': voo.empresa,
+                'companhia': voo.empresa,
                 'index': len(self.trechos) - 1,
                 'opção': len(self.trajetos[voo.saida][voo.destino]) + 1,
                 'custo': voo.custo,

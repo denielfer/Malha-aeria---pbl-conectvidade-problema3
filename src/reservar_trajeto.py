@@ -1,25 +1,25 @@
 from trecho import Trecho
 import requests
 class Reservador_trajeto:
-    def __init__(self, trajeto:str, href_companias:list[dict], do = None, undo = None):
+    def __init__(self, trajeto:str, href_companhias:list[dict], do = None, undo = None):
         # print(f'{trajeto=}')
-        cidades, companias = trajeto.split('|')
+        cidades, companhias = trajeto.split('|')
         self.cidades = [cidade.strip('->') for cidade in cidades.split('->')]
-        self.companias = [companhia.strip('->') for companhia in companias.split('->')][:-1]
+        self.companhias = [companhia.strip('->') for companhia in companhias.split('->')][:-1]
         self.hrefs_action = []
         self.href_undo = []
-        self.companias_done = []
+        self.companhias_done = []
         self.do = do
         self.undo = undo
-        self.status='esperando'
-        self.text=''
+        self.status = 'esperando'
+        self.text = ''
         # print("________________")
-        # print(f'{self.companias=},{companias=},{self.cidades=},{cidades=}')
-        for i, companhia in enumerate(self.companias):
-            # print(companhia in companias)
-            if companhia in href_companias:
-                self.hrefs_action.append(f'{href_companias[companhia]}/ocupar/{self.cidades[i]}/{self.cidades[i+1]}/{companhia}')
-                self.href_undo.append(f'{href_companias[companhia]}/desocupar/{self.cidades[i]}/{self.cidades[i+1]}/{companhia}')
+        # print(f'{self.companhias=},{companhias=},{self.cidades=},{cidades=}')
+        for i, companhia in enumerate(self.companhias):
+            # print(companhia in companhias)
+            if companhia in href_companhias:
+                self.hrefs_action.append(f'{href_companhias[companhia]}/ocupar/{self.cidades[i]}/{self.cidades[i+1]}/{companhia}')
+                self.href_undo.append(f'{href_companhias[companhia]}/desocupar/{self.cidades[i]}/{self.cidades[i+1]}/{companhia}')
         # print()
         # print(self.hrefs_action)
         # print(self.href_undo)
@@ -28,7 +28,7 @@ class Reservador_trajeto:
         if(do == None):
             def do_f():
                 self.status = 'reservando'
-                for i, companhia in enumerate(self.companias):
+                for i, companhia in enumerate(self.companhias):
                     try:
                         resp = requests.get(self.hrefs_action[i], timeout=10)
                     except:
@@ -38,7 +38,7 @@ class Reservador_trajeto:
                         self.undo()
                         return f"Erro em Reservar vagas, tente novamente mais tarde. Nenhuma vaga foi reservada.(Verifique se o servidor da companhia '{companhia}' está online)"
                     if(resp.status_code == 200):
-                        self.companias_done.append(companhia)
+                        self.companhias_done.append(companhia)
                     else:
                         t = self.hrefs_action[i].split('/')
                         saida, destino, companhia = t[-3:]
@@ -50,7 +50,7 @@ class Reservador_trajeto:
             self.do = do_f
         if(undo == None):
             def undo_f():
-                for i, companhia in enumerate(self.companias_done):
+                for i, companhia in enumerate(self.companhias_done):
                     try:
                         resp = requests.get(self.href_undo[i])
                     except:

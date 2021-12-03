@@ -40,7 +40,7 @@
                             <ul id='descrição{{i}}{{n}}' class="list-group list-group-flush">
                                {% for trecho in opções %}
                                     <div {%if trecho.display%}{%else%}hidden{%endif%}>
-                                        <li class="list-group-item">Companhia: {{ trecho.compania }}</li>
+                                        <li class="list-group-item">Companhia: {{ trecho.companhia }}</li>
                                         <li class="list-group-item">Preço: R${{ trecho.custo }}</li>
                                         <li class="list-group-item">Duração do voo: {{ trecho.tempo }}h</li>
                                         <li class="list-group-item">Vagas:{{ trecho.vagas }}</li>
@@ -91,7 +91,7 @@
         let custo = 0
         let tempo = 0
         let path = ''
-        companias = ''
+        companhias = ''
         for(let i = 1; true; i++){
             let a = document.getElementById(`trecho${id}${i}`)
             if(a != null){
@@ -102,13 +102,13 @@
                 let select = document.getElementById(`trecho${id}${i}`).value -1
                 d = d[select].children
                 // console.log(d)
-                companias += d[0].textContent.replace('\n','').replace(' ','').split(':')[1]+'->'
+                companhias += d[0].textContent.replace('\n','').replace(' ','').split(':')[1]+'->'
                 custo += parseFloat(d[1].textContent.replace('\n','').split(':')[1].replace('R$',''))
                 tempo += parseFloat(d[2].textContent.replace('\n','').split(':')[1].replace('h',''))
                 // console.log(custo)
                 // console.log(tempo)
             }else{
-                path += document.getElementById(`destino_trecho${id}${i-1}`).textContent+'|'+companias
+                path += document.getElementById(`destino_trecho${id}${i-1}`).textContent+'|'+companhias
                 document.getElementById(`trajeto${id}`).value = path
                 break
             }
