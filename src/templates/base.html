@@ -17,10 +17,13 @@
             }
             a {
             color: #dee2e6;
+            text-decoration: none;
             }
-        
             a:hover {
             color: #3cc368;
+            }
+            .hover_green:hover{
+                color: #3cc368;
             }
             .center{display: grid; 
                 place-items: center
@@ -51,7 +54,7 @@
         <div style="position:-webkit-sticky; position:sticky; top:0; z-index: 1; background-color: #121212;">
             <nav class="navbar navbar-dark">
                 <div class="container-fluid">
-                  <a href='/' class="navbar-brand">Home</a>
+                  <a href='/'>Home</a>
                   <ul class="list-inline">
                     {% for companhia, is_on in base_context.companhia_is_up %}
                     <li class="list-inline-item">{{companhia}}:

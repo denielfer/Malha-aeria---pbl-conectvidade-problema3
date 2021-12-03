@@ -1,5 +1,4 @@
 import threading
-from typing import Sequence
 from flask import Flask, jsonify, request, render_template
 import requests
 import sys
@@ -11,29 +10,18 @@ from time import sleep
 from threading import Semaphore
 from gerenciador_de_manager import Gerenciador_de_manager
 
-# dados = None
 pedidos_trajetos_pra_processar = []
 
 dados = util.load(sys.argv)
-# print(dados)
 if(dados is None):
     raise("Caregamento de informações não foi realizada com sucesso")
+global todas_as_companhias #existe uma variável global chamada todas_as_companhias
 todas_as_companhias = dados['companhias'].copy()
 todas_as_companhias[dados['nome']] = f'http://{dados["ip"]}:{dados["port"]}'
 t = util.inicializar_ring(dados['companhias'], todas_as_companhias)
-# print(t)
+
 if(t != None):
     todas_as_companhias = t
-
-# print(f"Este servidor corresponde ao da companhia: {dados['nome']} e esta sendo executado no link: http://{dados['ip']}:{dados['port']}")
-
-# precisamos de um dicionario com todas as companhias 
-# ( o que inclui a nossa que nao esta nesse dicionario 
-# e precisa ser um dicionario que é atualizado conforme novas 
-# companhias entram no sistema)
-
-# print(f'{dados=}\n\n\n{todas_as_companhias=}')
-# input()
 
 trajetos_para_reservar:list[Reservador_trajeto] = []
 pode_reservar = Semaphore()
@@ -76,9 +64,10 @@ def fazendo_operação():
 @app.route('/set_ordem_manager', methods=['POST'])
 def set_ordem_manager():
     temp = {companhia:href for companhia,href in request.form.items()}
+    global todas_as_companhias
     todas_as_companhias = temp
     gerenciador_manager.companhias = temp
-    return'',200
+    return '', 200
 
 @app.route('/get_ordem_manager', methods=['GET'])
 def get_ordem_manager():
@@ -86,8 +75,6 @@ def get_ordem_manager():
 
 @app.route('/ciclo_iniciar', methods=['GET'])
 def ciclo_iniciar():
-    # print(request.form)
-    # print("___________")
     gerenciador_manager.init_circulo()
     return f'{gerenciador_manager.ciclo}', 200 if (gerenciador_manager.ciclo) else 0 #retornamos 201 se estamos fazendo operação e 200 se não
 
@@ -107,7 +94,6 @@ def __get_all_voos__():
     voos = []
     for c in hrefs.values():
         try:
-            # print(hrefs[c])
             voos += requests.get(f"{c}/voos", timeout = 1).json()
         except Exception: #caso algum não responda, apenas vamos para o próximo
             pass
@@ -121,19 +107,15 @@ def __render_home_with_text__(text=''):
 @app.route('/reservar', methods=['POST'])
 def reservar_trajetos():
     r = Reservador_trajeto(request.form['trajeto'], href_companhias = todas_as_companhias)
-    # return __render_home_with_text__(text=r.reservar())
     trajetos_para_reservar.append(r)
     while not(r.status == "Erro" or r.status == "Reservado"):
-        # print(r.status,(r.status != "Erro" or r.status != "Reservado"))
         sleep(1)
-    # return __render_home_with_text__(text=r.text)
     success = r.status == "Reservado"
     return jsonify({'success':success,'text':r.text}), 200
 
 @app.route('/ver_trajetos/', methods=['POST'])
 def ver_trajetos():
     saida, destino = request.form['saida'], request.form['destino']
-    # print('from', saida, 'to', destino)
     gerenciador = __get_gerenciador_todos_trajetos__()
     success, resultado = gerenciador.make_all_trajetos(saida = saida, destino = destino)
     lista_trajetos =[ 
@@ -165,30 +147,22 @@ def ver_trajetos():
 def reserva_passagem(saida:str, destino:str, companhia:str):
     '''
     Rota não pública para uso interno
-    '''
+    '''     
     if(companhia == dados["nome"]):
-        caminho = dados['trajetos'].find_from_to(saida, destino)
-        if(caminho == None):
-            return "Trajeto indicado nao foi encontrado", 404
-        caminho = caminho[0]
-        if (caminho):
-            if(dados['trechos'][caminho['index']].ocupar_vaga()):
-                return 'Assento alocado', 200
-            else:
-                return f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{companhia}"', 404
-        return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{companhia}"', 404
+        caminho = dados['trajetos'].find_from_to(saida, destino) #retorna None se não tiver caminho, se tiver, retorna lista com trechos
+        if(caminho is None):
+            return "Trajeto indicado nao foi encontrado", 404 #caso a companhia não tenha o trecho solicitado, retornamos que o trajeto pedido não existe
+        for caminho in caminho: #se tivermos mais de um, quer dizer que a companhia oferece mais de um voo de {saida} para {destino}, então se não der pra ocupar vaga em um, tentaremos no próximo
+            if(dados['trechos'][caminho['index']].ocupar_vaga()): #se conseguimos ocupar a vaga com sucesso
+                return 'Assento alocado', 200 #retornamos ok
+        return f'limite de passageiros ja alcançado no voo de "{saida}" -> "{destino}" na companhia "{companhia}"', 404 #se passamos por toda as opções da companhia e não foi possível reservar, retornamos que todos os assentos estão alocados 
     elif(companhia in todas_as_companhias):
-        dados_companhia = todas_as_companhias[companhia]
-        href = f"http://{dados_companhia['ip']}:{dados_companhia['port']}/ocupar/{saida}/{destino}/{companhia}"
+        href = f"{todas_as_companhias[companhia]}/ocupar/{saida}/{destino}/{companhia}"
         try:
-            request = requests.get(href, timeout=60)
+            request = requests.get(href, timeout = 60)
         except Exception as e: #essa exception seria relacionada ao request
             return f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{companhia}"', 404
-        return request.raw,request.status_code # ainda nao testado se isso sobrepoe o if else abaixo
-        if(request.status_code != 200): #se tiver uma forma mais fácil, pode tirar o if else aqui (ex: retornando o request recebido)
-            return 'Problema na reserva do trecho {saida} -> {destino} na companhia {companhia}', 404
-        else:
-            return 'Assento alocado', 200
+        return request.text, request.status_code
     else:
         return  'A companhia informada não foi encontrada', 404
 
@@ -197,29 +171,24 @@ def desreservar_passagem(saida:str, destino:str, companhia:str):
     '''
     Rota não pública para uso interno
     '''
-    if(companhia == dados["nome"]):
-        caminho = dados['trajetos'].find_from_to(saida,destino)
-        if(caminho == None):
-            return "Trajeto indicado não foi encontrado", 404
-        caminho = caminho[0]
-        if (caminho):
-            if(dados['trechos'][caminho['index']].liberar_vaga()):
-                return 'Assento desalocado', 200
-            else:
-                return  f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{companhia}"', 200
-        return  f'Trecho "{saida}" -> "{destino}" não encontrado na companhia "{companhia}"', 404
-    elif(companhia in todas_as_companhias):
-        dados_companhia = todas_as_companhias[companhia]
-        href = f"http://{dados_companhia['ip']}:{dados_companhia['port']}/desocupar/{saida}/{destino}/{companhia}"
+    if(companhia == dados["nome"]):#se for do nosso servidor o desocupamos a vaga
+        caminhos = dados['trajetos'].find_from_to(saida, destino) #retorna None se não tiver caminho, se tiver retorna lista com trechos
+        if(caminhos is None):
+            return "Trajeto indicado não foi encontrado", 404 #caso a companhia não tenha o trecho solicitado, retornamos que o trajeto pedido não existe
+        #se tivermos mais de um quer dizer que a companhia oferece mais de um voo de {saida} para {destino}, então se não der pra desocupar vaga em um, tentaremos no próximo 
+        #(assim ainda não existe suporte para desocupar acento de um voos específico caso 2 ou mais voos da mesma companhia façam o mesmo trecho, assim, ele vai liberando
+        #vagas na ordem na qual os trechos foram colocados no arquivo de conf, ou adicionados posteriormente)
+        for caminho in caminhos: 
+            if(dados['trechos'][caminho['index']].liberar_vaga()): #se conseguimos liberar a vaga com sucesso
+                return 'Assento desalocado', 200 #retornamos ok
+        return  f'O voo já tem sua capacidade máxima livre. Voo de "{saida}" -> "{destino}" na companhia "{companhia}"', 404 # se passamos por toda as opções da companhia e nao foi possivel reservar retornamos que todos os assentos estao alocados ja 
+    elif(companhia in todas_as_companhias): #se o pedido for pra um servidor conhecido, repassamos o request para ele
+        href = f"{todas_as_companhias[companhia]}/desocupar/{saida}/{destino}/{companhia}"
         try:
             request = requests.get(href, timeout = 60)
         except Exception as e: #essa exception seria relacionada ao request
             return  f'Problema na reserva do trecho "{saida}" -> "{destino}" na companhia "{companhia}"', 404
-        return request.raw,request.status_code #ainda não testado se isso sobrepõe o if else abaixo
-        # if(request.status_code != 200): #se tiver uma forma mais fácil, pode tirar o if else aqui (ex: retornando o request recebido)
-        #     return 'Problema na reserva do trecho {saida} -> {destino} na companhia {companhia}', 404
-        # else:
-        #     return 'Assento alocado', 200
+        return request.text,request.status_code
     else:
         return 'A companhia informada não foi encontrada', 404
 
@@ -248,7 +217,7 @@ def add_voo():
         dados['voos'].append(novo_voo)
         util.__escrever_binario_de_conf__(dados)
         trecho = Trecho(**novo_voo)
-        dados['trechos'].append(trecho)
+        #dados['trechos'].append(trecho)
         dados['trajetos'].add_voo(trecho)
         return __render_home_with_text__(text = f'O voo de {trecho.saida} para {trecho.destino} foi adicionado, com custo de {trecho.custo} e tempo de {trecho.tempo}'), 200
 
@@ -259,20 +228,38 @@ def add_companhia():
     if(request.method == "GET"):
         return render_template('add_companhia.html', base_context=__get_base_context__())
     else:
+        global todas_as_companhias #para informarmos ao python que não estamos criando uma variavel local chamada todas_as_companhias e sim usando a global
         semaphore_add_companhia.acquire()
         try:
             temp = todas_as_companhias.copy()
             if(dados['nome'] in temp):
                 del(temp[dados['nome']])
-            util.propagate(temp,{request.form['companhia']:request.form["href"]},todas_as_companhias)
             dados["companhias"][request.form['companhia']] = request.form["href"]
             todas_as_companhias[request.form['companhia']] = request.form["href"]
+            temp = todas_as_companhias
+            t = util.inicializar_ring(dados['companhias'],todas_as_companhias)
+            if(t != None and t.items()!=todas_as_companhias.items()): # se tiver resposta de outras companhias
+                todas_as_companhias = t
+                gerenciador_manager.companhias = t
+                gerenciador_manager.end_afther_ciclo()
+                for href in temp:
+                    try:
+                        requests.get(f'{href}/end_after_cicle')
+                    except Exception:
+                        pass
             semaphore_add_companhia.release()
             util.__escrever_binario_de_conf__(dados)
             return  __render_home_with_text__(text=f'a companhia: {request.form["companhia"]} for adicionada a lista de companhias afiliadas. A api desta companhia se encontra na porta: {request.form["href"]}'),200
-        except Exception: #caso o formulário não tenha os campos que buscamos
+        except Exception as e: # caso o formulario nao tenha os campos que buscamos
             semaphore_add_companhia.release()
-            return  __render_home_with_text__(text = 'NA MORAL? METEU ESSA MERMO?'), 404
+            return  __render_home_with_text__(text='NA MORAL? METEU ESSA MERMO?'),404
+
+@app.route('/end_after_cicle', methods=['GET'])
+def end_after_cicle():
+    gerenciador_manager.end_afther_ciclo()
+    return '',200
+    
+
 
 @app.route('/companhias_conectadas', methods=['GET', 'POST'])
 def companhias_conectadas():
@@ -284,24 +271,21 @@ def companhias_conectadas():
     else:
         semaphore_add_companhia.acquire()
         try:
-            # print(request.form)
-            companhias_to_check = request.form #companhias passadas no request
+            companhias_to_check = request.form # companhias passadas no request
         except Exception:
             return '', 404
-        # print("-----------",companhias_to_check)
-        companhias_already_in = {}
+        companhias_already_in={}
         companhias_out = {}
-        for companhia,href in companhias_to_check.items(): #para as companhias recebidas no post
+        for companhia,href in companhias_to_check.items(): # para as companhias recebidas no post
             if(companhia in todas_as_companhias and todas_as_companhias[companhia] == href): # se ela ja estiver nos dados e o href for o passado
-                companhias_already_in[companhia] = href # adicionanos nas companhias que já tínhamos
+                companhias_already_in[companhia] = href # adicionanos nas companhias que ja tinhamos
             else: # se nao 
                 todas_as_companhias[companhia] = href
                 companhias_out[companhia] = href
         if( companhias_out != {}):
-            util.propagate(todas_as_companhias,companhias_out) #propagamos para as comapanhias que já tínhamos todas as companhias que temos agora
+            util.propagate(todas_as_companhias,companhias_out) # propagamos para as comapanias que ja tinhamos todas as companhias que temos agora
         semaphore_add_companhia.release()
-        # print("///////////", todas_as_companhias)
-        return jsonify(todas_as_companhias), 200
+        return jsonify(todas_as_companhias),200
 
 if(__name__== "__main__"):
     print( dados['ip'], dados['port'])

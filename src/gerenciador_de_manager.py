@@ -24,17 +24,18 @@ class Gerenciador_de_manager:
 
     def init_circulo(self):
         if(self.thread is None):
-            # print("[Gerenciador de manager] thread_iniciada")
-            self.thread = threading.Thread(target = self.__main_loop__)
-            self.thread.setDaemon(True)
-            self.thread.start()
+            semafaro = threading.Semaphore()
+            semafaro.acquire()
+            thread = threading.Thread(target=self.__main_loop__,kwargs={'semaphore':semafaro})
+            thread.setDaemon(True)
+            thread.start()
+            self.thread = (thread,semafaro)
 
-    def __main_loop__(self):
-        while True:
-            # print(f'++++++++++++++++++++++++++{self.companhias}+++++++++++++++++++++++++++++++++++++++')
-            self.temp_companhias = list(self.companhias) #fazemos uma cópia para o caso de se houver alteração, não quebrar o loop (assim, companhias adicionadas depois ficariam para próxima rotação)
+    def __main_loop__(self,semaphore:threading.Semaphore):
+        while not semaphore.acquire(False):
+            self.temp_companhias = list(self.companhias) # fazemos uma copia para o caso de ter alteração nao quebrar o loop ( assim companhias adicionadas depois ficariam para proxima rotação )
             self.esperar_nova_rodada()
-            sleep(.1)
+            sleep(1)
             print('[Gerenciador de manager] rodada começada')
             self.ciclo = True
             while(len(self.temp_companhias) > 0): #enquanto todas as companhias não forem managers
@@ -54,29 +55,22 @@ class Gerenciador_de_manager:
                         sleep(.2) #esperando 200 ms para perguntar novamente
                 #então o loop continua passando para o próximo manager
             self.ciclo = False
+        semaphore.release()
+        del(semaphore)
+        print(f"[Gerenciador Manager] finalizando")
 
     def start_resolver_pedidos(self):
-        # if(len(self.trajetos_para_reservar) > 0): #se tivermos trajetos para resolver
-            # print('[Gerenciador de manager] sou o cordenador')
-
-            #As duas linhas são passadas para dentro da thread que as usam para reduzir o tempo de operações antes do sleep
-            # self.pode_fazer_reserva = True
-            # self.semaphore_de_liberação_resolver_pedidos.acquire() #liberamos o semaphore
-
-            semaphore_resolvendo_pedido:threading.Semaphore = self.init_thread_resolver_pedidos()
-            sleep(TEMPO_POR_companhia_EM_S) # esperamos o tempo
-            self.semaphore_de_liberação_resolver_pedidos.release() #pegamos o semaphore de volta (isso pode ter atraso, caso um pedido ainda esteja sendo resolvido)
-            semaphore_resolvendo_pedido.acquire() #esperamos se estiver terminando de resolver operação no momento que o tempo dele acabou
-            # print('[Gerenciador de manager] deixei de ser o coordenador')
-        # else: #se nao 
-        #     sleep(TEMPO_POR_companhia_EM_S/5) #esperamos um tempo 
+        semaphore_resolvendo_pedido:threading.Semaphore = self.init_thread_resolver_pedidos()
+        sleep(TEMPO_POR_companhia_EM_S) # esperamos o tempo
+        self.semaphore_de_liberação_resolver_pedidos.release() # pegamos o semaphore de volta ( isso pode ter atraso caso um pedido ainda esteja sendo resolvido )
+        semaphore_resolvendo_pedido.acquire() # esperamos se estiver terminando de resolver operação no momento que o tempo dele acabou
 
 
-    def __resolver_reserva_trajeto__(self, estou_resolvendo_pedido:threading.Semaphore):
-        self.pode_fazer_reserva = True
-        self.semaphore_de_liberação_resolver_pedidos.acquire() #liberamos o semaphore
+
+    def __resolver_reserva_trajeto__(self,estou_resolvendo_pedido:threading.Semaphore):
+        self.pode_fazer_reserva=True
+        self.semaphore_de_liberação_resolver_pedidos.acquire() # libramos o semaphore
         while not self.semaphore_de_liberação_resolver_pedidos.acquire(False):
-            # print(f'{lista_de_pedidos=}')
             if(self.pode_fazer_reserva):
                 if(len(self.trajetos_para_reservar) > 0):
                     estou_resolvendo_pedido.acquire()
@@ -106,20 +100,14 @@ class Gerenciador_de_manager:
 
     def esperar_nova_rodada(self):
         temp_comp = self.companhias.copy()
-        # print('____________________________________')
-        # print(temp_comp)
-        # print('____________________________________')
-        for companhia, href in temp_comp.items():
+        for companhia,href in temp_comp.items():
             keep_going = True
             while keep_going: #neste loop, esperamos até que todos os servidores conectados concordem em iniciar um novo ciclo
                 keep_going = False
                 resp = None
-                try: #tentamos
-                    # print('_____________________________________')
-                    # print(self.companhias)
-                    # print('_____________________________________')
+                try: # tentamos
                     print(f'[Gerenciador de manager] esperando por {companhia=}')
-                    resp = get(f'{href}/ciclo_iniciar', timeout = 1) #fazer um request para as companhias que conhecemos perguntando se o ciclo deles acabou também
+                    resp = get(f'{href}/ciclo_iniciar',timeout=1)# fazer um request para as companhias que conhecemos perguntando se o ciclo deles acabou tambemx
                 except Exception as e:
                     pass
                 if(resp is not None and resp.status_code == 200): #se alguma das respostas não for 
@@ -129,21 +117,23 @@ class Gerenciador_de_manager:
 
     def __verificar_se_existe_manager__(self) -> bool:
         existe_manager = False
-        comp_to_check = self.companhias.copy() #para o caso de uma companhia ser adicionada enquanto estamos iterando não gerar um erro, fazemos uma cópia
-        for companhia,href in comp_to_check.items(): #para cada companhia que conhecemos
-            # print(f'[Gerenciador de manager] {companhia=} : {href=}')
+        comp_to_check = self.companhias.copy() # para o caso de uma companhia ser adicionada enquanto estamos iterando nao gerar um erro fazemos uma copia
+        for companhia,href in comp_to_check.items(): # para cada companhia que conhecemos
             try:
-                resp = get(f'{href}/tem_manager', timeout = 1) #pedimos se esta companhia tem um manager
-            except Exception: #caso ela esteja desligada
+                resp = get(f'{href}/tem_manager',timeout=1) # pedimos se esta companhia tem um manager
+            except Exception: # caso ela esteja desligada
                 print(f'[Gerenciador de manager] {companhia=} nao respondeu')
-                continue #assim pulamos a parte abaixo
-            #se algumas delas responder, quer dizer que estão ligadas, então existe um manager
-            # if(resp.status_code == 200):
-                # print(f'[Gerenciador de manager] Existe manager, esperando notificação de {companhia=}')
-            existe_manager = True
-            break #assim que acharmos o manager em 1 companhia, podemos parar de procurar
+                continue # assim skipamos a parte abaixo
+            # se algumas delas responder quer dizer que estao ligadas entao existe um manager
+            existe_manager=True
+            break # assim que acharmos manager em 1 companhias podemos para de procuirar
         return existe_manager
 
+    def end_afther_ciclo(self):
+        thread,semafaro = self.thread
+        semafaro.release()
+        self.thread = None
+        
 
 if __name__ == "__main__":
     a = {1:12}

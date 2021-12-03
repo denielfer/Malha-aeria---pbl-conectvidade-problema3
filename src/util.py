@@ -3,7 +3,6 @@ import threading
 from time import sleep
 from trecho import Trecho
 from gerenciador_de_trajetos import Gerenciador_de_trajetos
-from reservar_trajeto import Reservador_trajeto
 from requests import get,post
 
 decoder = JSONDecoder()
@@ -42,7 +41,6 @@ def __propagate__(to_which_companies, what_companies):
     to_which_companies = to_which_companies.copy()
     for href in to_which_companies.values():
         try:
-            # print(f'{what_companies=}')
             post(f'{href}/companhias_conectadas', data = what_companies, timeout = 5)
         except Exception:
             pass
@@ -92,31 +90,28 @@ def inicializar(companhias, nome, self_href, todas_as_companhias):
                     companhias_avizadas.append(companhia)
                 except Exception:
                     pass
-            # print(f'pergunta para: {href}')
             try:
                 resp = get(f'{href}/companhias_conectadas', timeout = 5)
                 resp = resp.json()
-            except Exception: # se der timeout ou se nao tiver nada no json ( nao conseguir pega um json na resposta ) ou se o server estiver offline
-                # print(f' erro request para {companhia}')
-                continue # segue pra proxima
-            # print(f'resposta foi: {resp}')
-            companhias_copy.update(resp) # se conseguio adicionamos na nossa copia ( pra nao dar problema no loop )
-        if(nome in companhias_copy): # apagamos a referencia desta companhia do conjunto de companhias conhecidas
+            except Exception: #se der timeout ou se não tiver nada no json (não conseguir, pega um json na resposta) ou se o server estiver offline
+                continue #segue pra próxima
+            companhias_copy.update(resp) #se conseguiu adicionamos na nossa cópia (pra não dar problema no loop)
+        if(nome in companhias_copy): #apagamos a referência desta companhia do conjunto de companhias conhecidas
             del(companhias_copy[nome])
-        if(companhias_copy.items() == companhias.items()): # se o resultado da busca é igual ao que ja temos
-            continuar = False # acabamos a busca
-        else: # se nao
+        if(companhias_copy.items() == companhias.items()): #se o resultado da busca é igual ao que já temos
+            continuar = False #acabamos a busca
+        else: #se não
             companhias_adicionadas = {}
             for companhia, href in companhias_copy.items():
                 if not(companhia in companhias and companhias[companhia] == href):
                     companhias_adicionadas[companhia] = href
             companhias.update(companhias_copy)
             companhias_to_do = companhias_adicionadas
-    # assim as que ja estavam no sistema e nos nao conheciamos sao conhecidos por todos
+    #assim, as que já estavam no sistema e nós não conhecíamos, são conhecidos por todos
 
 def inicializar_ring(companhias, todas_as_companhias):
     print('propagando informaçoes')
-    __propagate__(companhias, todas_as_companhias) # emviamos para todas que conhecemos todas as que conhecemos ( incluindo agente )
+    __propagate__(companhias, todas_as_companhias) #enviamos para todas que conhecemos todas as que conhecemos (incluindo a gente)
     ordens = {}
     print("colhendo informações do ring")
     for companhia, href in companhias.items():

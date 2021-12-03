@@ -2,7 +2,6 @@ from trecho import Trecho
 import requests
 class Reservador_trajeto:
     def __init__(self, trajeto:str, href_companhias:list[dict], do = None, undo = None):
-        # print(f'{trajeto=}')
         cidades, companhias = trajeto.split('|')
         self.cidades = [cidade.strip('->') for cidade in cidades.split('->')]
         self.companhias = [companhia.strip('->') for companhia in companhias.split('->')][:-1]
@@ -11,20 +10,12 @@ class Reservador_trajeto:
         self.companhias_done = []
         self.do = do
         self.undo = undo
-        self.status = 'esperando'
-        self.text = ''
-        # print("________________")
-        # print(f'{self.companhias=},{companhias=},{self.cidades=},{cidades=}')
+        self.status='esperando'
+        self.text=''
         for i, companhia in enumerate(self.companhias):
-            # print(companhia in companhias)
             if companhia in href_companhias:
                 self.hrefs_action.append(f'{href_companhias[companhia]}/ocupar/{self.cidades[i]}/{self.cidades[i+1]}/{companhia}')
                 self.href_undo.append(f'{href_companhias[companhia]}/desocupar/{self.cidades[i]}/{self.cidades[i+1]}/{companhia}')
-        # print()
-        # print(self.hrefs_action)
-        # print(self.href_undo)
-        # print()
-        # print("________________")
         if(do == None):
             def do_f():
                 self.status = 'reservando'
