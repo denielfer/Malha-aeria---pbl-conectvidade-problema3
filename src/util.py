@@ -6,12 +6,22 @@ from requests import get,post
 
 decoder = JSONDecoder()
 def load_conf_from_file(file_path:str) -> dict:
-    conf = {}
+    '''
+        Função que carega as configurações apartir de um arquivo
+
+        @param file_path: string contendo o caminho do arquivo que sera caregado
+        @return dict contendo as configurações colocadas no arquivo
+    '''
     with open(file_path, 'r', encoding = "utf-8") as a:
         json_string = '{' + (','.join(a.readlines())).replace('\n', '') + '}'
         return decoder.decode(json_string)
 
 def __escrever_binario_de_conf__(conf):
+    '''
+        Função que escreve as configurações passadas em um arquivo
+
+        @param conf: dict cotnendo as configurações que serao escritas
+    '''
     with open(f'arquivos_bin//{conf["nome"]}.bin', 'wb') as f:
         import pickle
         d = conf.copy()
@@ -19,12 +29,27 @@ def __escrever_binario_de_conf__(conf):
         del(d['trajetos'])
         pickle.dump(d, f)
 class ConfiguraçãoMalSucedida(Exception):
+    '''
+        Exception de load mal sucedido
+    '''
     pass
 
 def make_trechos(trechos:list[dict]):
+    '''
+        Função que retorna uma lista de objetos do tipo trecho gerador apartir dos dados
+        presentes em {trechos}
+
+        @param trechos: list de dict no qual cada dict deve conter as informações para geração de um Trecho
+        @return list de Trecho sendo uma lista dos trechos gerados apartir dos dados presenters em {trechos}
+    '''
     return [Trecho(**trecho) for trecho in trechos]
 
 def manual_conf() -> dict:
+    '''
+        Funcão que gera uma configuração manual do servidor
+
+        @return dict contendo as configurações do servidor
+    '''
     dados = {}
     dados['nome'] = input("Digite o nome da companhia: ")
     dados['ip'] = input("Digite o ip desse servidor: ")
@@ -37,6 +62,14 @@ def manual_conf() -> dict:
 
 
 def __propagate__(to_which_companies, what_companies):
+    '''
+        Função que faz a propagação de {what_companies} para {to_which_companies}
+
+        Função usada para propagar alguma nova compania para as conhecidas ( havendo suport para enviar mutiplas ao mesmo tempo )
+
+        @param to_which_companies: dict que tem como value o href das companhias para qual {what_companies} sera enviado
+        @param what_companies: dict dict contendo como key o nome da compania e value o href desta compania
+    '''
     to_which_companies = to_which_companies.copy()
     for href in to_which_companies.values():
         try:
@@ -45,11 +78,23 @@ def __propagate__(to_which_companies, what_companies):
             pass
 
 def propagate(to_which_companies,what_companies):
+    '''
+        Função que cria uma thread para fazer a propagação das companhias informadas para as companhias passadas
+
+        @param to_which_companies: dict que tem como value o href das companhias para qual {what_companies} sera enviado
+        @param what_companies: dict dict contendo como key o nome da compania e value o href desta compania
+    '''
     t = threading.Thread(target = __propagate__, args = (to_which_companies, what_companies))
     t.setDaemon(True)
     t.start()
 
 def load(argv):
+    '''
+        Função responsavel por olhar entre os parametros passados para inicialização do servidor e 
+        determina se o load é por arquivo txt, binario ou manual
+
+        @param argv: list de parametros passados no terminal quando o arquivo server.py foi executado
+    '''
     dados = None
     for n, arg in enumerate(argv): # procuramos se foi passado arquivo de configuração
         if( arg == '-c'): # caso tenha sido passado caregamos ele
@@ -68,6 +113,15 @@ def load(argv):
     return dados
 
 def inicializar(companhias, nome, self_href, todas_as_companhias):
+    '''
+        Função legado de inicialização ( nao tem inicialização do ring )
+
+        @param companhias: dict contendo como key nome da compania e value o href da api desta compania
+        @param nome: string contendo o nome da nossa colpania
+        @param self_href: string contendo o href da nossa API
+        @param todas_as_companhias: dict contendo como key nome da compania e value o href da api desta compania ( este dicionario 
+            é igual ao {companhias} com adição dos dados da nossa compania ) 
+    '''
     ## Busca de companhias conectadas de nas companhias ja conectadas
     continuar = True
     companhias_to_do = companhias.copy()
@@ -109,6 +163,13 @@ def inicializar(companhias, nome, self_href, todas_as_companhias):
     #assim, as que já estavam no sistema e nós não conhecíamos, são conhecidos por todos
 
 def inicializar_ring(companhias, todas_as_companhias):
+    '''
+        Função que faz a propagação das companhias conhecidas e inicialização do Ring, verificando com companhias conhecidas
+
+        @param companhias: dict contendo como key nome da compania e value o href da api desta compania
+        @param todas_as_companhias: dict contendo como key nome da compania e value o href da api desta compania ( este dicionario 
+            é igual ao {companhias} com adição dos dados da nossa compania ) 
+    '''
     print('propagando informaçoes')
     __propagate__(companhias, todas_as_companhias) #enviamos para todas que conhecemos todas as que conhecemos (incluindo a gente)
     ordens = {}

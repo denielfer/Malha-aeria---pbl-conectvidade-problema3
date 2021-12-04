@@ -16,12 +16,25 @@ class Gerenciador_de_trajetos():
                 'vagas_totais': trecho.quantidade_maxima_de_vagas})
 
     def find_from(self, saida:str) -> dict:
+        '''
+            Função para achar cidades conectadas as cidade informada ( {saida} )
+
+            @param saida: string inidicando de qual cidade queremos saber
+            @return dict contendo informações das cidades conectadas e informações do voo que as conecta 
+                ( neste dicionario temos como chave o nome da cidade conectada e o seu dado 
+                  correspondente é uma lista de dados de voos que conectam estas cidades    )
+        '''
         if (saida in self.trajetos):
             return self.trajetos[saida]
         return None
     
     def find_from_to(self, saida:str, destino:str) -> list[dict]:
         '''
+            Função para achar os voos que conectam cidade {saida} a {destino}
+
+            @param saida: string inidicando de qual cidade queremos saber
+            @param destino: string indicando para qual cidade queremos
+            @return list de dict contendo informações dos voos que conectam estas cidades
         '''
         if (saida in self.trajetos):
             if(destino in self.trajetos[saida]):
@@ -29,10 +42,22 @@ class Gerenciador_de_trajetos():
         return None
     
     def make_all_trajetos(self, saida:str, destino:str):
+        '''
+            Função que faz a busca de todos os trajetos que ligam {saida} a {destino}
+
+            @param saida: string indiciando a cidade de saida
+            @parma destino: string indicando a cidade de destino
+            @return: tupla contendo (success,resultado_da_busca) no qual
+                success é um bool que guarda True se a existe caminhos em 
+                    resultado_da_busca
+                Resultado_da_busca é uma list de trajetos, um trajeto
+                    é uma lista de nome de cidades na ordem que leva de
+                    {saida} para {destino}
+        '''
         resultado = []
         success = False
         search = {f'_{saida}':[saida]}
-        while search != {}:
+        while search != {}: # emquanto a busca nao acaba
             next_iteraration = {}
             for id in search:
                 cidade = id.split('_')[1]
@@ -44,15 +69,26 @@ class Gerenciador_de_trajetos():
                                 resultado.append(vizinhos + [cidade_conectada])
                                 success = True  
                             else:
-                                next_iteraration[f'{cidade}_{cidade_conectada}'] = vizinhos + [cidade_conectada]
+                                next_iteraration[f'{cidade}_{cidade_conectada}'] = vizinhos + [cidade_conectada] #é usado {cidade}_{cidade_conectada} pois como usamos um dicionario pra guardar as buscas em processo ainda caso hajam em um mesmo nivel 2 cidades que tenham conecção com uma terceira cidade uma das 2 cidades teria sua busca apagada
             search = next_iteraration
         return success, resultado
 
     def get_vagas(self, index:int):
+        '''
+            informa a quantidade de vagas disponiveis do trecho especificado
+
+            @param index: int indicando o index do voo solicitado na lista de voos
+            @return int indicando a quantidade de vagas resmanecentes do voo solicitado
+        '''
         trecho = self.trechos[index]
         return trecho.quantidade_maxima_de_vagas - trecho.quantidade_de_vagas_ocupadas
 
     def add_voo(self, voo:Trecho):
+        '''
+            Função para adiciona um voo no gerenciador
+
+            @param voo: Trecho que sera adicionado
+        '''
         self.trechos.append(voo)
         if(voo.saida not in self.trajetos):
             self.trajetos[voo.saida] = {}

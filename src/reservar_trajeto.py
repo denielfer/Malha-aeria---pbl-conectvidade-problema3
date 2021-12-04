@@ -56,4 +56,11 @@ class Reservador_trajeto:
                 self.status="Erro"
             self.undo = undo_f
     def reservar(self):
+        '''
+            Função que execura função do deste elemento e caso algum erro aconteça executa função undo
+
+            Este elemento serve para fazer os request em ordem para aloca os assentos nos voos de um trajeto
+
+            Por fim o texto informativo do resultado deste objeto é atualizado
+        '''
         self.text= self.do()

@@ -23,6 +23,9 @@ class Gerenciador_de_manager:
         ##Se já existir uma manager, esperamos o próximo ciclo para entrarmos na rotação
 
     def init_circulo(self):
+        '''
+            Se nao existir uma thread executando o ciclo principal do Ring uma é iniciada
+        '''
         if(self.thread is None):
             semafaro = threading.Semaphore()
             semafaro.acquire()
@@ -32,6 +35,13 @@ class Gerenciador_de_manager:
             self.thread = (thread,semafaro)
 
     def __main_loop__(self,semaphore:threading.Semaphore):
+        '''
+            Loop principal executado no Ring, fazendo um ciclo pela ordem de companhias conhecidas e inicializando uma thread
+            para lidar com os requests de reserva quando for sua vez de execução
+
+            @param estou_resolvendo_pedido: threading.Semaphore (mutex) que controla 
+                quando devemos para fazer novas iterações pelo Ring
+        '''
         while not semaphore.acquire(False):
             self.temp_companhias = list(self.companhias) # fazemos uma copia para o caso de ter alteração nao quebrar o loop ( assim companhias adicionadas depois ficariam para proxima rotação )
             self.esperar_nova_rodada()
@@ -60,6 +70,13 @@ class Gerenciador_de_manager:
         print(f"[Gerenciador Manager] finalizando")
 
     def start_resolver_pedidos(self):
+        '''
+            Função para iniciar uma thread que resolve pedidso de reserva no sistema
+            esta função so encera apos a thread ser encerada, nao temos a função da thread
+            nesta função pois ela é responsavel por determina o tempo no qual a thread deve deixar
+            de fazer operações por montivos de tempo, a thread tambem pode encerrar encerra suas 
+            operações pois outro servidor acha que o seu tempo ja acabou 
+        '''
         semaphore_resolvendo_pedido:threading.Semaphore = self.init_thread_resolver_pedidos()
         sleep(TEMPO_POR_companhia_EM_S) # esperamos o tempo
         self.semaphore_de_liberação_resolver_pedidos.release() # pegamos o semaphore de volta ( isso pode ter atraso caso um pedido ainda esteja sendo resolvido )
@@ -68,6 +85,12 @@ class Gerenciador_de_manager:
 
 
     def __resolver_reserva_trajeto__(self,estou_resolvendo_pedido:threading.Semaphore):
+        '''
+            Função da thread de resolver reserva de trajetos
+
+            @param estou_resolvendo_pedido: threading.Semaphore (mutex) que controla 
+                quando devemos para de resovler pedidos
+        '''
         self.pode_fazer_reserva=True
         self.semaphore_de_liberação_resolver_pedidos.acquire() # libramos o semaphore
         while not self.semaphore_de_liberação_resolver_pedidos.acquire(False):
@@ -85,6 +108,11 @@ class Gerenciador_de_manager:
         self.pode_fazer_reserva = False
 
     def init_thread_resolver_pedidos(self) -> threading.Semaphore:
+        '''
+            Função que cria e inicia a thread de resolver pedidos
+
+            @return: threading.Semaphore ( mutex ) que encerra a execução da thread
+        '''
         estou_resolvendo_pedido=threading.Semaphore()
         t = threading.Thread(target = self.__resolver_reserva_trajeto__, kwargs = {"estou_resolvendo_pedido":estou_resolvendo_pedido}, daemon = True)
         t.setDaemon(True)
@@ -92,6 +120,11 @@ class Gerenciador_de_manager:
         return estou_resolvendo_pedido
 
     def verificar_manager(self):
+        '''
+            Função que faz a verificação se o manager esta fazendo operação
+
+            @return: bool indicando se o manager respondeu que esta fazendo operação
+        '''
         try: #tentamos
             resp = get(f'{self.companhias[self.manager]}/fazendo_operação', timeout = 1) #fazer um request para o manager, se ele está fazendo operação
         except Exception: #se der erro, ele caiu, então não está
@@ -99,6 +132,10 @@ class Gerenciador_de_manager:
         return resp.status_code == 201 #teve resposta e ele não passou a vez ainda, ele ainda está fazendo operação então retornamos true
 
     def esperar_nova_rodada(self):
+        '''
+            Função que trava a inicialização do Ring ate que todas as companhias conhecidas
+            respondam que esta na faze de iniciar um novo ciclo
+        '''
         temp_comp = self.companhias.copy()
         for companhia,href in temp_comp.items():
             keep_going = True
@@ -116,6 +153,16 @@ class Gerenciador_de_manager:
                     sleep(.1)
 
     def __verificar_se_existe_manager__(self) -> bool:
+        '''
+            Função que verifica se existe manager em alguma das companhias conhecidas
+
+            se alguma delas ja estiver executado concluimos que ja existe e so devemos iniciar nosso
+            Ring quando esta compania pergunta se agente esta no modo de iniciar ciclo, pois pela 
+            inicialização nos passamos para ela ( para as companhias conhecidas ) nossas informações,
+            ou seja, ela nos conhece e faria essa pergunta
+
+            @return: bool indicando se existe alguma companhia com manager ( se alguma companhia conhecida ja tem seu Ring sendo executado )
+        '''
         existe_manager = False
         comp_to_check = self.companhias.copy() # para o caso de uma companhia ser adicionada enquanto estamos iterando nao gerar um erro fazemos uma copia
         for companhia,href in comp_to_check.items(): # para cada companhia que conhecemos
@@ -130,6 +177,9 @@ class Gerenciador_de_manager:
         return existe_manager
 
     def end_afther_ciclo(self):
+        '''
+            função para parar execução do main loop apos o ciclo atual do Ring
+        '''
         thread,semafaro = self.thread
         semafaro.release()
         self.thread = None
