@@ -104,6 +104,7 @@ def __get_gerenciador_todos_trajetos__():
 
 def __render_home_with_text__(text=''):
         return render_template('text.html', base_context=__get_base_context__(), text = text)
+
 @app.route('/reservar', methods=['POST'])
 def reservar_trajetos():
     r = Reservador_trajeto(request.form['trajeto'], href_companias = todas_as_companias)
@@ -258,8 +259,6 @@ def add_compania():
 def end_after_cicle():
     gerenciador_manager.end_afther_ciclo()
     return '',200
-    
-
 
 @app.route('/companias_conectadas', methods=['GET', 'POST'])
 def companias_conectadas():

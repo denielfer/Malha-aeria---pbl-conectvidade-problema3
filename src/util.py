@@ -1,6 +1,5 @@
 from json import JSONDecoder
 import threading
-from time import sleep
 from trecho import Trecho
 from gerenciador_de_trajetos import Gerenciador_de_trajetos
 from requests import get,post
