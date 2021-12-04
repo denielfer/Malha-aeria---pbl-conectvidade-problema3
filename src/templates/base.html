@@ -56,7 +56,7 @@
                 <div class="container-fluid">
                   <a href='/'>Home</a>
                   <ul class="list-inline">
-                    {% for companhia, is_on in base_context.compania_is_up %}
+                    {% for companhia, is_on in base_context.companhia_is_up %}
                     <li class="list-inline-item">{{companhia}}:
                         {% if is_on %}
                         <i class="fas fa-check" style="color: green;"></i>
