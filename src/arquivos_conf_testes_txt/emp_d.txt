@@ -2,4 +2,4 @@
 "ip":"26.31.211.47"
 "port":18497
 "voos":[]
-"companias":{}
+"companhias":{}
