@@ -1,12 +1,12 @@
 "nome":"Delta Airlines"
 "ip":"26.165.180.216"
 "port":18499
-"voos":[{"saida":"Imperatriz/MA", "destino":"Maceió/AL", "custo":560, "tempo":0.73, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":8}
-{"saida":"Parnamirim/RN", "destino":"Fortaleza/CE", "custo":745, "tempo":0.05, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":3}
-{"saida":"Teresina/PI", "destino":"Maceió/AL", "custo":168, "tempo":0.51, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":4}
-{"saida":"Aracaju/SE", "destino":"Teresina/PI", "custo":621, "tempo":0.06, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":21}
-{"saida":"Maceió/AL", "destino":"Parnamirim/RN", "custo":590, "tempo":0.06, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":10}
-{"saida":"Maceió/AL", "destino":"Recife/PE", "custo":390, "tempo":0.1, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":19}
-{"saida":"Parnamirim/RN", "destino":"Campina Grande/PB", "custo":681, "tempo":0.2, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":9}
-{"saida":"Salvador/BA", "destino":"Maceió/AL", "custo":265, "tempo":1.0, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":12}]
+"voos":[{"saida":"Imperatriz-MA", "destino":"Maceió-AL", "custo":560, "tempo":0.73, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":8}
+{"saida":"Parnamirim-RN", "destino":"Fortaleza-CE", "custo":745, "tempo":0.05, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":3}
+{"saida":"Teresina-PI", "destino":"Maceió-AL", "custo":168, "tempo":0.51, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":4}
+{"saida":"Aracaju-SE", "destino":"Teresina-PI", "custo":621, "tempo":0.06, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":21}
+{"saida":"Maceió-AL", "destino":"Parnamirim-RN", "custo":590, "tempo":0.06, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":10}
+{"saida":"Maceió-AL", "destino":"Recife-PE", "custo":390, "tempo":0.1, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":19}
+{"saida":"Parnamirim-RN", "destino":"Campina Grande-PB", "custo":681, "tempo":0.2, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":9}
+{"saida":"Salvador-BA", "destino":"Maceió-AL", "custo":265, "tempo":1.0, "empresa":"Delta Airlines","quantidade_maxima_de_vagas":12}]
 "companhias":{"Royal Air":"http://26.165.180.216:18498"}
