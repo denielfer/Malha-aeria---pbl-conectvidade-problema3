@@ -1,11 +1,11 @@
-"nome":"a"
+"nome":"Atlas Air"
 "ip":"26.31.211.47"
 "port":18500
-"voos":[{"saida":"e", "destino":"t", "custo":727, "tempo":0.45, "empresa":"a","quantidade_maxima_de_vagas":12}
-{"saida":"r", "destino":"s", "custo":521, "tempo":0.65, "empresa":"a","quantidade_maxima_de_vagas":28}
-{"saida":"a", "destino":"s", "custo":75, "tempo":0.4, "empresa":"a","quantidade_maxima_de_vagas":7}
-{"saida":"s", "destino":"e", "custo":361, "tempo":0.16, "empresa":"a","quantidade_maxima_de_vagas":2}
-{"saida":"q", "destino":"a", "custo":378, "tempo":0.57, "empresa":"a","quantidade_maxima_de_vagas":2}
-{"saida":"r", "destino":"f", "custo":461, "tempo":0.47, "empresa":"a","quantidade_maxima_de_vagas":17}
-{"saida":"a", "destino":"d", "custo":375, "tempo":0.59, "empresa":"a","quantidade_maxima_de_vagas":3}]
-"companhias":{"b":"http://26.165.180.216:18499"}
+"voos":[{"saida":"Fortaleza-CE", "destino":"Campina Grande-PB", "custo":727, "tempo":0.45, "empresa":"Atlas Air","quantidade_maxima_de_vagas":12}
+{"saida":"Parnamirim-RN", "destino":"Ilhéus-BA", "custo":521, "tempo":0.65, "empresa":"Atlas Air","quantidade_maxima_de_vagas":28}
+{"saida":"Salvador-BA", "destino":"Ilhéus-BA", "custo":75, "tempo":0.4, "empresa":"Atlas Air","quantidade_maxima_de_vagas":7}
+{"saida":"Ilhéus-BA", "destino":"Fortaleza-CE", "custo":361, "tempo":0.16, "empresa":"Atlas Air","quantidade_maxima_de_vagas":2}
+{"saida":"Recife-PE", "destino":"Salvador-BA", "custo":378, "tempo":0.57, "empresa":"Atlas Air","quantidade_maxima_de_vagas":2}
+{"saida":"Parnamirim-RN", "destino":"Maceió-AL", "custo":461, "tempo":0.47, "empresa":"Atlas Air","quantidade_maxima_de_vagas":17}
+{"saida":"Salvador-BA", "destino":"Imperatriz-MA", "custo":375, "tempo":0.59, "empresa":"Atlas Air","quantidade_maxima_de_vagas":3}]
+"companhias":{"Delta Airlines":"http://26.165.180.216:18499"}

@@ -1,10 +1,10 @@
-"nome":"c"
-"ip":"26.31.211.47"
+"nome":"Royal Air"
+"ip":"26.165.180.216"
 "port":18498
-"voos":[{"saida":"a", "destino":"w", "custo":177, "tempo":0.25, "empresa":"c","quantidade_maxima_de_vagas":12}
-{"saida":"a", "destino":"d", "custo":715, "tempo":0.78, "empresa":"c","quantidade_maxima_de_vagas":26}
-{"saida":"g", "destino":"d", "custo":21, "tempo":0.62, "empresa":"c","quantidade_maxima_de_vagas":4}
-{"saida":"g", "destino":"s", "custo":200, "tempo":0.71, "empresa":"c","quantidade_maxima_de_vagas":4}
-{"saida":"r", "destino":"a", "custo":524, "tempo":0.12, "empresa":"c","quantidade_maxima_de_vagas":15}
-{"saida":"s", "destino":"d", "custo":903, "tempo":0.83, "empresa":"c","quantidade_maxima_de_vagas":5}]
-"companhias":{"a":"http://26.31.211.47:18500"}
+"voos":[{"saida":"Salvador/BA", "destino":"Aracaju/SE", "custo":177, "tempo":0.25, "empresa":"Royal Air","quantidade_maxima_de_vagas":12}
+{"saida":"Salvador/BA", "destino":"Imperatriz/MA", "custo":715, "tempo":0.78, "empresa":"Royal Air","quantidade_maxima_de_vagas":26}
+{"saida":"Teresina/PI", "destino":"Imperatriz/MA", "custo":21, "tempo":0.62, "empresa":"Royal Air","quantidade_maxima_de_vagas":4}
+{"saida":"Teresina/PI", "destino":"Ilhéus/BA", "custo":200, "tempo":0.71, "empresa":"Royal Air","quantidade_maxima_de_vagas":4}
+{"saida":"Parnamirim/RN", "destino":"Salvador/BA", "custo":524, "tempo":0.12, "empresa":"Royal Air","quantidade_maxima_de_vagas":15}
+{"saida":"Ilhéus/BA", "destino":"Imperatriz/MA", "custo":903, "tempo":0.83, "empresa":"Royal Air","quantidade_maxima_de_vagas":5}]
+"companhias":{"Atlas Air":"http://26.31.211.47:18500"}
