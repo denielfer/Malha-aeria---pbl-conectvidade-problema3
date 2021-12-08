@@ -1,5 +1,5 @@
 # Descrição #
-Projeto para a 3° PBL da diciplina TEC502 - MI - CONCORRÊNCIA E CONECTIVIDADE. A descrição do problema pode ser vista [aqui]() e o seu relatorio [aqui]()
+Projeto para a 3° PBL da diciplina TEC502 - MI - CONCORRÊNCIA E CONECTIVIDADE. A descrição do problema pode ser vista [aqui](https://github.com/denielfer/Malha-aeria---pbl-conectvidade-problema3/blob/main/arquivos_pdf/prob_3.pdf) e o seu relatorio [aqui](https://github.com/denielfer/Malha-aeria---pbl-conectvidade-problema3/blob/main/arquivos_pdf/Relatorio%20problema%203%20-%20Malha%20aeria.pdf)
 
 Para solução deste problema foi desenvolvido um sistema descentralizado de companias de que oferecem voos, na qual em cada companhia é possivel ver os voos oferecidos por aquela companhia e pesquisar todos os trajetos possiveis entre 2 cidades ( considerando todos os voos conhecidos ). 
 Este sistema funciona de forma descentralizada ( cada compania pode operar plenamente de forma separada ) porém existindo a opção de conectar companias ( adicionar uma compania a lista de conhecidas de outra ) e assim estas companhias passam a se conhecer e nas pesquisas de trajetos são considerados os voos de todas as companias conhecidas
